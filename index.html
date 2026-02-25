@@ -3,440 +3,371 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HG Interiores de Madera — Visor 3D</title>
+<title>HG Interiores de Madera — Diseño 3D</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/6.26.0/babylon.min.js"></script>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-
-  body {
-    background-color: #2c2c2c;
-    color: white;
-    font-family: 'Segoe UI', sans-serif;
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
-  label {
-    font-weight: 600;
-    font-size: 12px;
-    color: #aaa;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 5px;
-    display: block;
-  }
-
-  input, select {
-    background-color: #444;
-    border: 1px solid #555;
-    border-radius: 8px;
-    padding: 10px 12px;
-    color: white;
-    font-size: 13px;
-    width: 100%;
-    transition: 0.2s;
-    outline: none;
-    font-family: 'Segoe UI', sans-serif;
-  }
-  input:focus, select:focus { border-color: #ffb800; background-color: #4d4d4d; box-shadow: 0 0 8px rgba(255,184,0,0.2); }
-  select option { background: #383838; }
-  input[readonly] { color: #aaa; cursor: default; }
-
-  .fas { font-family:"Font Awesome 5 Free"!important; font-weight:900!important; font-style:normal; }
-
-  /* HEADER */
-  header {
-    background: #1e1e1e;
-    border-bottom: 2px solid #ffb800;
-    padding: 0 20px;
-    height: 54px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-  }
-  .hdr-titulo { color:#ffb800; font-size:16px; font-weight:700; letter-spacing:2px; text-transform:uppercase; display:flex; align-items:center; gap:10px; }
-  .hdr-right { display:flex; align-items:center; gap:10px; }
-  .badge-proyecto { background:#383838; border:1px solid #555; border-radius:6px; padding:4px 14px; font-size:12px; color:#00bcff; font-weight:600; }
-
-  .btn-hg {
-    padding: 9px 16px;
-    border-radius: 8px;
-    font-weight: 700;
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border: none;
-    transition: 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 11px;
-  }
-  .btn-hg:hover { filter:brightness(1.2); transform:translateY(-1px); }
-  .btn-hg:active { transform:scale(0.95); }
-  .btn-amarillo { background:#ffb800; color:black; }
-  .btn-verde    { background:#218838; color:white; }
-  .btn-gris     { background:#555; color:#ccc; }
-
-  /* LAYOUT */
-  .main { display:flex; flex:1; overflow:hidden; }
-
-  /* SIDEBAR */
-  .sidebar {
-    width: 275px;
-    background: #383838;
-    border-right: 1px solid #555;
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    overflow-y: auto;
-  }
-  .sidebar::-webkit-scrollbar { width:4px; }
-  .sidebar::-webkit-scrollbar-thumb { background:#555; border-radius:2px; }
-
-  .sb-section { padding:14px; border-bottom:1px solid #444; }
-
-  .sb-titulo {
-    color: #ffb800;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    border-bottom: 1px solid #ffb800;
-    padding-bottom: 6px;
-    margin-bottom: 12px;
-  }
-
-  .campo-sb { margin-bottom:10px; }
-
-  .btn-full {
-    width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 12px;
-    cursor: pointer;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    transition: 0.2s;
-    font-family: 'Segoe UI', sans-serif;
-    border: none;
-    margin-top: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-  .btn-full:hover { filter:brightness(1.15); }
-  .bf-amarillo { background:#ffb800; color:black; }
-  .bf-gris { background:#555; color:#aaa; margin-top:6px; }
-
-  /* Piezas */
-  .pieza-item {
-    display:flex; align-items:flex-start; gap:8px;
-    padding:7px 8px; border-radius:6px; cursor:pointer;
-    transition:background 0.15s; border:1px solid transparent;
-  }
-  .pieza-item:hover { background:#444; }
-  .pieza-item.activa { background:#444; border-color:#ffb800; }
-  .pieza-dot { width:10px; height:10px; border-radius:2px; flex-shrink:0; margin-top:3px; border:1px solid rgba(255,255,255,0.15); }
-  .pieza-nombre { font-size:12px; color:white; font-weight:600; }
-  .pieza-dim { font-size:10px; color:#aaa; margin-top:1px; }
-  .canto-tag { display:inline-block; font-size:9px; padding:1px 5px; border-radius:3px; background:rgba(0,188,255,0.15); color:#00bcff; border:1px solid rgba(0,188,255,0.3); margin-right:2px; margin-top:2px; }
-
-  /* Stats */
-  .stat-fila { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid #444; font-size:11px; }
-  .stat-lbl { color:#aaa; }
-  .stat-val { color:white; font-weight:600; }
-  .stat-val.am { color:#ffb800; }
-  .stat-val.az { color:#00bcff; }
-
-  /* Botones exportar */
-  .btn-exp {
-    width:100%; padding:9px; border-radius:8px; font-size:11px; font-weight:700;
-    cursor:pointer; font-family:'Segoe UI',sans-serif; transition:0.2s; margin-bottom:6px;
-    letter-spacing:1px; border:none; text-transform:uppercase;
-    display:flex; align-items:center; gap:8px;
-  }
-  .btn-exp:hover { filter:brightness(1.2); transform:translateY(-1px); }
-  .exp-pdf { background:#ffb800; color:black; }
-  .exp-dxf { background:#1A5276; color:white; }
-  .exp-2d  { background:#218838; color:white; }
-
-  .empty-msg { text-align:center; color:#555; font-size:11px; padding:16px 0; letter-spacing:1px; text-transform:uppercase; }
-
-  /* CANVAS AREA */
-  .canvas-area { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-
-  /* Tabs */
-  .tabs { display:flex; background:#1e1e1e; border-bottom:1px solid #555; padding:0 16px; flex-shrink:0; }
-  .tab { padding:10px 18px; font-size:12px; font-weight:700; color:#aaa; cursor:pointer; border-bottom:2px solid transparent; transition:0.2s; letter-spacing:1px; text-transform:uppercase; }
-  .tab:hover { color:white; }
-  .tab.activo { color:#ffb800; border-bottom-color:#ffb800; }
-
-  /* 3D */
-  .canvas-cont { flex:1; position:relative; overflow:hidden; background:#1a1a1a; }
-  #renderCanvas { width:100%; height:100%; display:block; touch-action:none; outline:none; }
-
-  .vista-lbl { position:absolute; top:10px; left:10px; background:rgba(30,30,30,0.9); border:1px solid #555; border-radius:6px; padding:5px 12px; font-size:11px; color:#aaa; letter-spacing:1px; text-transform:uppercase; }
-  .vista-lbl span { color:#ffb800; font-weight:700; }
-
-  .ctrl-overlay { position:absolute; bottom:16px; right:16px; display:flex; flex-direction:column; gap:5px; }
-  .ctrl-btn { width:36px; height:36px; background:rgba(56,56,56,0.92); border:1px solid #555; border-radius:6px; color:#ffb800; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px; transition:0.15s; }
-  .ctrl-btn:hover { background:#ffb800; color:black; border-color:#ffb800; }
-
-  /* 2D Panel */
-  #panel2d { flex:1; background:#2c2c2c; display:none; overflow:auto; padding:20px; }
-  #panel2d.visible { display:flex; flex-direction:column; align-items:center; }
-  .plano-wrap { background:#383838; border-radius:12px; border:1px solid #555; padding:24px; width:100%; max-width:900px; }
-  .plano-titulo { color:#ffb800; font-size:16px; font-weight:700; letter-spacing:2px; text-transform:uppercase; border-bottom:2px solid #ffb800; padding-bottom:8px; margin-bottom:16px; }
-  .vistas-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  .vista-box { border:1px solid #555; border-radius:8px; padding:12px; background:#2c2c2c; }
-  .vista-box-titulo { font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#aaa; margin-bottom:8px; }
-  .vista-svg-wrap { width:100%; aspect-ratio:4/3; background:#1e1e1e; border:1px solid #444; border-radius:4px; overflow:hidden; }
-
-  /* Despiece Panel */
-  #panelDespiece { flex:1; background:#2c2c2c; display:none; overflow:auto; padding:20px; }
-  #panelDespiece.visible { display:block; }
-  .desp-wrap { background:#383838; border-radius:12px; border:1px solid #555; padding:24px; max-width:1000px; margin:0 auto; }
-  .desp-hdr { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; padding-bottom:12px; border-bottom:2px solid #ffb800; }
-  .desp-titulo { color:#ffb800; font-size:18px; font-weight:700; letter-spacing:2px; text-transform:uppercase; }
-  .desp-meta { font-size:11px; color:#aaa; margin-top:3px; }
-  .desp-logo { color:#ffb800; font-weight:700; font-size:12px; text-align:right; letter-spacing:1px; text-transform:uppercase; }
-
-  .tabla-cont { border-radius:8px; overflow:hidden; border:1px solid #555; margin-top:10px; }
-  table { width:100%; border-collapse:collapse; background:#383838; }
-  thead { background:#ffb800; color:black; }
-  th { padding:11px 13px; font-size:11px; text-transform:uppercase; letter-spacing:1px; text-align:left; font-family:'Segoe UI',sans-serif; }
-  td { padding:9px 13px; border-bottom:1px solid #444; font-size:12px; }
-  tbody tr:hover { background:#444; }
-
-  .resumen-cantos { margin-top:16px; padding:14px; background:#2c2c2c; border-radius:8px; border-left:3px solid #ffb800; }
-  .resumen-titulo { font-size:11px; font-weight:700; color:#ffb800; letter-spacing:1px; text-transform:uppercase; margin-bottom:10px; }
-  .resumen-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; }
-  .resumen-item { background:#383838; border-radius:6px; padding:10px 14px; border:1px solid #555; }
-  .res-mat { font-size:10px; color:#aaa; margin-bottom:2px; text-transform:uppercase; }
-  .res-metros { font-size:22px; font-weight:700; color:#ffb800; }
-  .res-unit { font-size:11px; color:#aaa; }
-
-  /* Loading */
-  #loading { position:fixed; inset:0; background:#2c2c2c; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999; transition:opacity 0.5s; }
-  #loading.oculto { opacity:0; pointer-events:none; }
-  .ld-titulo { color:#ffb800; font-size:22px; font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:6px; }
-  .ld-sub { font-size:11px; color:#aaa; margin-bottom:28px; letter-spacing:2px; text-transform:uppercase; }
-  .ld-bar { width:220px; height:3px; background:#444; border-radius:2px; overflow:hidden; }
-  .ld-fill { height:100%; background:#ffb800; border-radius:2px; animation:ldFill 2s ease forwards; }
-  @keyframes ldFill { from{width:0} to{width:100%} }
-
-  /* Toast */
-  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(16px); background:#383838; border:1px solid #ffb800; color:white; padding:10px 22px; border-radius:8px; font-size:12px; font-weight:600; opacity:0; transition:all 0.3s; z-index:9999; pointer-events:none; }
-  .toast.visible { opacity:1; transform:translateX(-50%) translateY(0); }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#2c2c2c; color:white; font-family:'Segoe UI',sans-serif; height:100vh; overflow:hidden; display:flex; flex-direction:column; }
+label { font-weight:600; font-size:11px; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; display:block; }
+input,select { background:#444; border:1px solid #555; border-radius:6px; padding:8px 10px; color:white; font-size:12px; width:100%; outline:none; font-family:'Segoe UI',sans-serif; transition:0.2s; }
+input:focus,select:focus { border-color:#ffb800; background:#4d4d4d; box-shadow:0 0 6px rgba(255,184,0,0.2); }
+select option { background:#383838; }
+input[readonly] { color:#aaa; cursor:default; }
+.fas { font-family:"Font Awesome 5 Free"!important; font-weight:900!important; font-style:normal; }
+header { background:#1e1e1e; border-bottom:2px solid #ffb800; padding:0 16px; height:50px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.hdr-titulo { color:#ffb800; font-size:14px; font-weight:700; letter-spacing:2px; text-transform:uppercase; display:flex; align-items:center; gap:8px; }
+.hdr-right { display:flex; align-items:center; gap:7px; }
+.badge { background:#383838; border:1px solid #555; border-radius:5px; padding:3px 10px; font-size:11px; color:#00bcff; font-weight:600; }
+.btn-hg { padding:7px 13px; border-radius:6px; font-weight:700; cursor:pointer; text-transform:uppercase; letter-spacing:1px; border:none; transition:0.2s; display:inline-flex; align-items:center; gap:6px; font-family:'Segoe UI',sans-serif; font-size:11px; }
+.btn-hg:hover { filter:brightness(1.2); transform:translateY(-1px); }
+.am { background:#ffb800; color:black; }
+.vd { background:#218838; color:white; }
+.gr { background:#555; color:#ccc; }
+.main { display:flex; flex:1; overflow:hidden; }
+.sidebar { width:265px; background:#383838; border-right:1px solid #555; display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; }
+.sidebar::-webkit-scrollbar { width:4px; }
+.sidebar::-webkit-scrollbar-thumb { background:#555; border-radius:2px; }
+.sb-sec { padding:11px; border-bottom:1px solid #444; }
+.sb-tit { color:#ffb800; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; border-bottom:1px solid #ffb800; padding-bottom:5px; margin-bottom:9px; }
+.campo { margin-bottom:7px; }
+.btn-full { width:100%; padding:8px; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer; letter-spacing:1px; text-transform:uppercase; transition:0.2s; font-family:'Segoe UI',sans-serif; border:none; margin-top:4px; display:flex; align-items:center; justify-content:center; gap:6px; }
+.btn-full:hover { filter:brightness(1.15); }
+.bf-am { background:#ffb800; color:black; }
+.bf-vd { background:#218838; color:white; }
+.bf-gr { background:#555; color:#aaa; margin-top:5px; }
+.bf-az { background:#007bff; color:white; }
+.modulo-item { display:flex; align-items:center; gap:6px; padding:6px 8px; border-radius:5px; border:1px solid #555; margin-bottom:4px; background:#2c2c2c; cursor:pointer; transition:0.15s; }
+.modulo-item:hover { border-color:#ffb800; }
+.mod-num { width:20px; height:20px; background:#ffb800; color:black; border-radius:3px; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.mod-nombre { font-size:11px; font-weight:600; color:white; }
+.mod-dim { font-size:10px; color:#aaa; }
+.mod-del { color:#ff4444; cursor:pointer; font-size:11px; padding:2px 4px; }
+.stat-fila { display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid #444; font-size:10px; }
+.stat-lbl { color:#aaa; }
+.stat-val { font-weight:600; }
+.stat-val.am { color:#ffb800; }
+.stat-val.az { color:#00bcff; }
+.canvas-area { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.tabs { display:flex; background:#1e1e1e; border-bottom:1px solid #555; padding:0 12px; flex-shrink:0; }
+.tab { padding:9px 15px; font-size:11px; font-weight:700; color:#aaa; cursor:pointer; border-bottom:2px solid transparent; transition:0.2s; letter-spacing:1px; text-transform:uppercase; }
+.tab:hover { color:white; }
+.tab.activo { color:#ffb800; border-bottom-color:#ffb800; }
+.canvas-cont { flex:1; position:relative; overflow:hidden; background:#1a1a1a; }
+#renderCanvas { width:100%; height:100%; display:block; touch-action:none; outline:none; }
+.vista-lbl { position:absolute; top:8px; left:8px; background:rgba(30,30,30,0.9); border:1px solid #555; border-radius:5px; padding:4px 10px; font-size:10px; color:#aaa; }
+.vista-lbl span { color:#ffb800; font-weight:700; }
+.ctrl-overlay { position:absolute; bottom:12px; right:12px; display:flex; flex-direction:column; gap:4px; }
+.ctrl-btn { width:32px; height:32px; background:rgba(56,56,56,0.92); border:1px solid #555; border-radius:5px; color:#ffb800; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; transition:0.15s; }
+.ctrl-btn:hover { background:#ffb800; color:black; }
+#panelDiseno { flex:1; background:#2c2c2c; display:none; overflow:hidden; }
+#panelDiseno.visible { display:flex; }
+.diseno-left { width:300px; background:#383838; border-right:1px solid #555; display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; }
+.diseno-right { flex:1; padding:14px; overflow-y:auto; }
+.bib-filtros { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:9px; }
+.filt-btn { padding:4px 9px; border-radius:4px; font-size:10px; font-weight:700; cursor:pointer; border:1px solid #555; background:#444; color:#aaa; transition:0.15s; font-family:'Segoe UI',sans-serif; text-transform:uppercase; }
+.filt-btn.activo { background:#ffb800; color:black; border-color:#ffb800; }
+.filt-btn:hover { border-color:#ffb800; color:#ffb800; }
+.bib-item { padding:8px 10px; border-radius:5px; border:1px solid #555; margin-bottom:4px; cursor:pointer; transition:0.15s; background:#2c2c2c; }
+.bib-item:hover,.bib-item.sel { border-color:#ffb800; background:#333; }
+.bib-nombre { font-size:11px; font-weight:600; color:white; }
+.bib-desc { font-size:10px; color:#aaa; margin-top:2px; }
+.bib-dim { font-size:10px; color:#00bcff; margin-top:2px; }
+.bib-cat { display:inline-block; font-size:9px; padding:1px 5px; border-radius:3px; background:rgba(255,184,0,0.15); color:#ffb800; border:1px solid rgba(255,184,0,0.3); margin-bottom:3px; }
+.cfg-panel { background:#383838; border-radius:7px; border:1px solid #555; padding:12px; margin-bottom:10px; }
+.cfg-titulo { color:#ffb800; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:9px; border-bottom:1px solid #444; padding-bottom:5px; }
+.cfg-fila { display:flex; gap:7px; margin-bottom:7px; }
+.cfg-campo { flex:1; }
+.cantos-wrap { display:flex; gap:8px; background:#444; padding:7px 10px; border-radius:5px; border:1px solid #555; }
+.chk-canto { font-size:11px; color:#ffb800; display:flex; align-items:center; gap:4px; cursor:pointer; }
+.chk-canto input { width:auto; cursor:pointer; }
+.piezas-tabla { width:100%; border-collapse:collapse; }
+.piezas-tabla thead { background:#ffb800; color:black; }
+.piezas-tabla th { padding:6px 9px; font-size:10px; text-transform:uppercase; letter-spacing:1px; text-align:left; }
+.piezas-tabla td { padding:5px 9px; border-bottom:1px solid #444; font-size:11px; }
+.piezas-tabla tbody tr:hover { background:#383838; }
+#panelBoceto { flex:1; background:#2c2c2c; display:none; overflow:auto; padding:14px; }
+#panelBoceto.visible { display:block; }
+.boceto-wrap { background:#383838; border-radius:9px; border:1px solid #555; padding:18px; max-width:900px; margin:0 auto; }
+.boc-hdr { display:flex; justify-content:space-between; margin-bottom:12px; padding-bottom:9px; border-bottom:2px solid #ffb800; }
+.boc-titulo { color:#ffb800; font-size:15px; font-weight:700; letter-spacing:2px; text-transform:uppercase; }
+.boc-meta { font-size:11px; color:#aaa; margin-top:3px; }
+#panelDespiece { flex:1; background:#2c2c2c; display:none; overflow:auto; padding:14px; }
+#panelDespiece.visible { display:block; }
+.desp-wrap { background:#383838; border-radius:9px; border:1px solid #555; padding:18px; max-width:1000px; margin:0 auto; }
+.desp-hdr { display:flex; justify-content:space-between; margin-bottom:12px; padding-bottom:9px; border-bottom:2px solid #ffb800; }
+.desp-titulo { color:#ffb800; font-size:15px; font-weight:700; letter-spacing:2px; text-transform:uppercase; }
+.desp-meta { font-size:11px; color:#aaa; margin-top:3px; }
+.desp-logo { color:#ffb800; font-weight:700; font-size:11px; text-align:right; text-transform:uppercase; }
+.tabla-cont { border-radius:6px; overflow:hidden; border:1px solid #555; margin-top:8px; }
+table { width:100%; border-collapse:collapse; background:#383838; }
+thead { background:#ffb800; color:black; }
+th { padding:9px 11px; font-size:11px; text-transform:uppercase; letter-spacing:1px; text-align:left; font-family:'Segoe UI',sans-serif; }
+td { padding:7px 11px; border-bottom:1px solid #444; font-size:12px; }
+tbody tr:hover { background:#444; }
+.res-cantos { margin-top:12px; padding:11px; background:#2c2c2c; border-radius:6px; border-left:3px solid #ffb800; }
+.res-tit { font-size:11px; font-weight:700; color:#ffb800; letter-spacing:1px; text-transform:uppercase; margin-bottom:7px; }
+.res-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:7px; }
+.res-item { background:#383838; border-radius:5px; padding:8px 11px; border:1px solid #555; }
+.res-mat { font-size:9px; color:#aaa; text-transform:uppercase; }
+.res-m { font-size:19px; font-weight:700; color:#ffb800; }
+.res-u { font-size:10px; color:#aaa; }
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); display:none; align-items:center; justify-content:center; z-index:9000; }
+.modal-overlay.visible { display:flex; }
+.modal { background:#383838; border-radius:9px; border:1px solid #555; padding:22px; width:480px; max-width:95vw; }
+.modal-tit { color:#ffb800; font-size:13px; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:14px; border-bottom:1px solid #444; padding-bottom:7px; }
+.modal-fila { display:flex; gap:9px; margin-bottom:9px; }
+.modal-campo { flex:1; }
+.modal-btns { display:flex; gap:7px; margin-top:14px; justify-content:flex-end; }
+#loading { position:fixed; inset:0; background:#2c2c2c; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999; transition:opacity 0.5s; }
+#loading.oculto { opacity:0; pointer-events:none; }
+.ld-tit { color:#ffb800; font-size:20px; font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:5px; }
+.ld-sub { font-size:10px; color:#aaa; margin-bottom:22px; letter-spacing:2px; text-transform:uppercase; }
+.ld-bar { width:200px; height:3px; background:#444; border-radius:2px; overflow:hidden; }
+.ld-fill { height:100%; background:#ffb800; border-radius:2px; animation:ldF 2s ease forwards; }
+@keyframes ldF { from{width:0} to{width:100%} }
+.toast { position:fixed; bottom:18px; left:50%; transform:translateX(-50%) translateY(10px); background:#383838; border:1px solid #ffb800; color:white; padding:8px 18px; border-radius:6px; font-size:11px; font-weight:600; opacity:0; transition:all 0.3s; z-index:9999; pointer-events:none; }
+.toast.visible { opacity:1; transform:translateX(-50%) translateY(0); }
+.empty-msg { text-align:center; color:#555; font-size:10px; padding:12px 0; letter-spacing:1px; text-transform:uppercase; }
+@media print {
+  header,.sidebar,.tabs,.ctrl-overlay,.vista-lbl,#panelDiseno,#cont3d,.btn-hg { display:none!important; }
+  #panelDespiece,#panelBoceto { display:block!important; }
+  body { background:white; color:black; overflow:auto; height:auto; }
+  .desp-wrap,.boceto-wrap { background:white; border:none; color:black; }
+  th { background:#ffb800!important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+}
 </style>
 </head>
 <body>
 
 <div id="loading">
-  <div class="ld-titulo">HG Interiores de Madera</div>
-  <div class="ld-sub">Visor 3D · Planos · Despiece</div>
+  <div class="ld-tit">HG Interiores de Madera</div>
+  <div class="ld-sub">Software de Diseño · Visor 3D · Despiece</div>
   <div class="ld-bar"><div class="ld-fill"></div></div>
 </div>
 
 <header>
-  <div class="hdr-titulo"><i class="fas fa-cube"></i> HG Interiores de Madera — Visor 3D</div>
+  <div class="hdr-titulo"><i class="fas fa-cube"></i> HG Interiores de Madera</div>
   <div class="hdr-right">
-    <div class="badge-proyecto" id="badgeProyecto">Sin proyecto cargado</div>
-    <button class="btn-hg btn-amarillo" onclick="volverApp()"><i class="fas fa-home"></i> Volver a la app</button>
+    <div class="badge" id="badgeProyecto">Sin proyecto</div>
+    <button class="btn-hg am" onclick="abrirModalProyecto()"><i class="fas fa-folder-open"></i> Proyecto</button>
+    <button class="btn-hg vd" onclick="guardarEnCortes()" id="btnGuardar" style="display:none"><i class="fas fa-save"></i> Guardar en CORTES</button>
+    <button class="btn-hg gr" onclick="volverApp()"><i class="fas fa-home"></i> Volver</button>
   </div>
 </header>
 
 <div class="main">
-
-  <!-- SIDEBAR -->
   <div class="sidebar">
-
-    <div class="sb-section">
-      <div class="sb-titulo"><i class="fas fa-folder-open"></i> Proyecto</div>
-      <div class="campo-sb">
-        <label>Cliente</label>
-        <select id="selCliente" onchange="onCambiaCliente()">
-          <option value="">Seleccionar...</option>
-        </select>
+    <div class="sb-sec">
+      <div class="sb-tit"><i class="fas fa-cubes"></i> Módulos del proyecto</div>
+      <div id="listaModulos"><div class="empty-msg">Sin módulos</div></div>
+      <div id="statsBlk" style="display:none;margin-top:7px">
+        <div class="stat-fila"><span class="stat-lbl">Módulos</span><span class="stat-val am" id="stMod">0</span></div>
+        <div class="stat-fila"><span class="stat-lbl">Piezas totales</span><span class="stat-val am" id="stPiezas">0</span></div>
+        <div class="stat-fila"><span class="stat-lbl">Canto total</span><span class="stat-val az" id="stCanto">0.00 m</span></div>
       </div>
-      <div class="campo-sb">
-        <label>Localidad</label>
-        <input type="text" id="inputLocalidad" readonly placeholder="—">
-      </div>
-      <div class="campo-sb">
-        <label>Proyecto</label>
-        <input type="text" id="inputProyecto" placeholder="Nombre proyecto..." list="listaProyectos">
-        <datalist id="listaProyectos"></datalist>
-      </div>
-      <button class="btn-full bf-amarillo" onclick="cargarProyecto()"><i class="fas fa-sync-alt"></i> Cargar proyecto 3D</button>
-      <button class="btn-full bf-gris" onclick="cargarEjemplo()"><i class="fas fa-dice"></i> Ver ejemplo</button>
     </div>
-
-    <div class="sb-section" style="flex:1">
-      <div class="sb-titulo"><i class="fas fa-th-list"></i> Piezas</div>
-      <div id="listaPiezas"><div class="empty-msg">Sin piezas cargadas</div></div>
+    <div class="sb-sec">
+      <div class="sb-tit"><i class="fas fa-download"></i> Acciones</div>
+      <button class="btn-full bf-am" onclick="switchTab('diseno')"><i class="fas fa-pencil-ruler"></i> Diseño</button>
+      <button class="btn-full bf-az" onclick="switchTab('boceto')"><i class="fas fa-drafting-compass"></i> Boceto montador</button>
+      <button class="btn-full bf-vd" onclick="switchTab('despiece')"><i class="fas fa-list-alt"></i> Despiece</button>
+      <button class="btn-full bf-gr" onclick="switchTab('3d')"><i class="fas fa-cube"></i> Vista 3D</button>
+      <button class="btn-full bf-gr" onclick="exportarPDF()"><i class="fas fa-print"></i> Imprimir PDF</button>
+      <button class="btn-full bf-gr" onclick="exportarDXF()"><i class="fas fa-file-code"></i> Exportar DXF</button>
     </div>
-
-    <div class="sb-section">
-      <div class="sb-titulo"><i class="fas fa-chart-bar"></i> Resumen</div>
-      <div class="stat-fila"><span class="stat-lbl">Total piezas</span><span class="stat-val am" id="statPiezas">0</span></div>
-      <div class="stat-fila"><span class="stat-lbl">Materiales</span><span class="stat-val" id="statMateriales">—</span></div>
-      <div class="stat-fila"><span class="stat-lbl">Canto total</span><span class="stat-val az" id="statCanto">0.00 m</span></div>
-    </div>
-
-    <div class="sb-section">
-      <div class="sb-titulo"><i class="fas fa-download"></i> Exportar</div>
-      <button class="btn-exp exp-pdf" onclick="exportarPDF()"><i class="fas fa-print"></i> Despiece PDF</button>
-      <button class="btn-exp exp-dxf" onclick="exportarDXF()"><i class="fas fa-drafting-compass"></i> Planos DXF</button>
-      <button class="btn-exp exp-2d"  onclick="switchTab('2d')"><i class="fas fa-ruler-combined"></i> Ver planos 2D</button>
-    </div>
-
   </div>
 
-  <!-- CANVAS AREA -->
   <div class="canvas-area">
-
     <div class="tabs">
-      <div class="tab activo" id="tab3d" onclick="switchTab('3d')"><i class="fas fa-cube"></i> Vista 3D</div>
-      <div class="tab" id="tab2d" onclick="switchTab('2d')"><i class="fas fa-ruler-combined"></i> Planos 2D</div>
+      <div class="tab activo" id="tabDiseno" onclick="switchTab('diseno')"><i class="fas fa-pencil-ruler"></i> Diseño</div>
+      <div class="tab" id="tab3d" onclick="switchTab('3d')"><i class="fas fa-cube"></i> Vista 3D</div>
+      <div class="tab" id="tabBoceto" onclick="switchTab('boceto')"><i class="fas fa-drafting-compass"></i> Boceto</div>
       <div class="tab" id="tabDesp" onclick="switchTab('despiece')"><i class="fas fa-list-alt"></i> Despiece</div>
     </div>
 
-    <div class="canvas-cont" id="cont3d">
-      <canvas id="renderCanvas"></canvas>
-      <div class="vista-lbl">Vista: <span id="vistaActual">Perspectiva</span></div>
-      <div class="ctrl-overlay">
-        <button class="ctrl-btn" onclick="setVista('perspectiva')" title="Perspectiva">⬛</button>
-        <button class="ctrl-btn" onclick="setVista('frente')" title="Alzado">⬆</button>
-        <button class="ctrl-btn" onclick="setVista('lateral')" title="Lateral">➡</button>
-        <button class="ctrl-btn" onclick="setVista('planta')" title="Planta">🔽</button>
-        <button class="ctrl-btn" onclick="centrarCamara()" title="Centrar">🎯</button>
+    <!-- DISEÑO -->
+    <div id="panelDiseno" class="visible">
+      <div class="diseno-left">
+        <div style="padding:11px;border-bottom:1px solid #444">
+          <div class="sb-tit"><i class="fas fa-book"></i> Biblioteca</div>
+          <div class="bib-filtros">
+            <button class="filt-btn activo" onclick="filtrarBib('todos',this)">Todos</button>
+            <button class="filt-btn" onclick="filtrarBib('Armario',this)">Armarios</button>
+            <button class="filt-btn" onclick="filtrarBib('Cocina',this)">Cocina</button>
+            <button class="filt-btn" onclick="filtrarBib('Estantería',this)">Estanterías</button>
+            <button class="filt-btn" onclick="filtrarBib('Cajonera',this)">Cajoneras</button>
+          </div>
+          <div id="listaBiblioteca" style="max-height:calc(100vh - 300px);overflow-y:auto"></div>
+        </div>
       </div>
-    </div>
-
-    <div id="panel2d">
-      <div class="plano-wrap">
-        <div class="plano-titulo"><i class="fas fa-ruler-combined"></i> Planos Técnicos 2D</div>
-        <div class="vistas-grid">
-          <div class="vista-box">
-            <div class="vista-box-titulo">Alzado (Frente)</div>
-            <div class="vista-svg-wrap"><svg id="svgAlzado" width="100%" height="100%"></svg></div>
+      <div class="diseno-right">
+        <div id="msgDiseno" style="text-align:center;color:#555;padding:50px 20px;font-size:12px;letter-spacing:1px;text-transform:uppercase">
+          <i class="fas fa-arrow-left" style="color:#ffb800;margin-right:8px"></i> Selecciona un módulo de la biblioteca
+        </div>
+        <div id="configModulo" style="display:none">
+          <div class="cfg-panel">
+            <div class="cfg-titulo" id="cfgTitulo">Configurar módulo</div>
+            <div class="cfg-fila">
+              <div class="cfg-campo"><label>Alto (mm)</label><input type="number" id="cfAlto" value="2100"></div>
+              <div class="cfg-campo"><label>Ancho (mm)</label><input type="number" id="cfAncho" value="600"></div>
+              <div class="cfg-campo"><label>Fondo (mm)</label><input type="number" id="cfFondo" value="600"></div>
+            </div>
+            <div class="cfg-fila">
+              <div class="cfg-campo"><label>Material tablero</label><select id="cfMaterial"><option value="Blanco mate">Blanco mate</option></select></div>
+              <div class="cfg-campo"><label>Material puertas</label><select id="cfPuertas"><option value="">— Igual —</option></select></div>
+            </div>
+            <div class="cfg-fila">
+              <div class="cfg-campo"><label>Grueso tablero</label><input type="number" id="cfGrueso" value="18"></div>
+              <div class="cfg-campo"><label>Grueso respaldo</label><input type="number" id="cfRespaldo" value="8"></div>
+              <div class="cfg-campo"><label>Baldas interiores</label><input type="number" id="cfBaldas" value="1" min="0" max="10"></div>
+            </div>
+            <div style="margin-bottom:8px">
+              <label>Cantos</label>
+              <div class="cantos-wrap">
+                <label class="chk-canto"><input type="checkbox" id="ckL1" onchange="toggleCanto(this,'ckL2')"> L1</label>
+                <label class="chk-canto"><input type="checkbox" id="ckL2" onchange="toggleCanto(this,'ckL1')" checked> L2</label>
+                <label class="chk-canto" style="margin-left:10px"><input type="checkbox" id="ckA1" onchange="toggleCanto(this,'ckA2')"> A1</label>
+                <label class="chk-canto"><input type="checkbox" id="ckA2" onchange="toggleCanto(this,'ckA1')" checked> A2</label>
+              </div>
+            </div>
+            <div class="cfg-fila">
+              <div class="cfg-campo"><label>Puertas</label>
+                <select id="cfPuertas2">
+                  <option value="no">Sin puertas</option>
+                  <option value="si" selected>Con puertas</option>
+                  <option value="corredera">Correderas</option>
+                </select>
+              </div>
+              <div class="cfg-campo"><label>Posición</label>
+                <select id="cfPos">
+                  <option value="linea">En línea</option>
+                  <option value="esq-izq">Esquina izq.</option>
+                  <option value="esq-der">Esquina der.</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn-full bf-am" onclick="añadirModulo()"><i class="fas fa-plus"></i> Añadir al proyecto</button>
           </div>
-          <div class="vista-box">
-            <div class="vista-box-titulo">Planta (Superior)</div>
-            <div class="vista-svg-wrap"><svg id="svgPlanta" width="100%" height="100%"></svg></div>
-          </div>
-          <div class="vista-box">
-            <div class="vista-box-titulo">Perfil (Lateral)</div>
-            <div class="vista-svg-wrap"><svg id="svgPerfil" width="100%" height="100%"></svg></div>
-          </div>
-          <div class="vista-box">
-            <div class="vista-box-titulo">Información del proyecto</div>
-            <div id="infoPlano" style="font-size:12px;color:#aaa;padding:6px;line-height:2;">Carga un proyecto.</div>
+          <div id="piezasCalc" style="display:none">
+            <div class="cfg-panel">
+              <div class="cfg-titulo"><i class="fas fa-list"></i> Piezas del proyecto</div>
+              <div style="overflow-x:auto">
+                <table class="piezas-tabla">
+                  <thead><tr><th>#</th><th>Módulo</th><th>Pieza</th><th>Largo</th><th>Ancho</th><th>Gr.</th><th>Material</th><th>Cantos</th></tr></thead>
+                  <tbody id="piezasTb"></tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div id="panelDespiece">
+    <!-- 3D -->
+    <div class="canvas-cont" id="cont3d" style="display:none">
+      <canvas id="renderCanvas"></canvas>
+      <div class="vista-lbl">Vista: <span id="vistaActual">Perspectiva</span></div>
+      <div class="ctrl-overlay">
+        <button class="ctrl-btn" onclick="setVista('perspectiva')">⬛</button>
+        <button class="ctrl-btn" onclick="setVista('frente')">⬆</button>
+        <button class="ctrl-btn" onclick="setVista('lateral')">➡</button>
+        <button class="ctrl-btn" onclick="setVista('planta')">🔽</button>
+        <button class="ctrl-btn" onclick="centrarCamara()">🎯</button>
+      </div>
+    </div>
+
+    <!-- BOCETO -->
+    <div id="panelBoceto" style="display:none">
+      <div class="boceto-wrap">
+        <div class="boc-hdr">
+          <div><div class="boc-titulo"><i class="fas fa-drafting-compass"></i> Boceto montador</div><div class="boc-meta" id="bocMeta">—</div></div>
+          <div style="color:#ffb800;font-weight:700;font-size:11px;text-align:right;text-transform:uppercase">HG Interiores<br>de Madera</div>
+        </div>
+        <svg id="svgBoceto" width="100%" style="background:#1e1e1e;border-radius:6px;border:1px solid #444;min-height:280px"></svg>
+        <div id="leyendaBoc" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+    <!-- DESPIECE -->
+    <div id="panelDespiece" style="display:none">
       <div class="desp-wrap">
         <div class="desp-hdr">
-          <div>
-            <div class="desp-titulo"><i class="fas fa-list-alt"></i> Listado de Despiece</div>
-            <div class="desp-meta" id="despMeta">— Sin proyecto cargado —</div>
-          </div>
+          <div><div class="desp-titulo"><i class="fas fa-list-alt"></i> Listado de Despiece</div><div class="desp-meta" id="despMeta">—</div></div>
           <div class="desp-logo">HG Interiores<br>de Madera</div>
         </div>
         <div class="tabla-cont">
           <table>
-            <thead>
-              <tr>
-                <th>#</th><th>Pieza</th><th>Largo</th><th>Ancho</th><th>Grueso</th>
-                <th>Material</th><th>L.Canto</th><th>A.Canto</th><th>Color Canto</th><th>M.L. Canto</th>
-              </tr>
-            </thead>
-            <tbody id="despTbody">
-              <tr><td colspan="10" style="text-align:center;color:#555;padding:20px;">Sin datos</td></tr>
-            </tbody>
+            <thead><tr><th>#</th><th>Módulo</th><th>Pieza</th><th>Largo</th><th>Ancho</th><th>Gr.</th><th>Material</th><th>Cantos</th><th>M.L.</th></tr></thead>
+            <tbody id="despTb"><tr><td colspan="9" style="text-align:center;color:#555;padding:18px">Sin datos</td></tr></tbody>
           </table>
         </div>
-        <div class="resumen-cantos" id="resumenCantos" style="display:none">
-          <div class="resumen-titulo"><i class="fas fa-ruler"></i> Metros lineales de canto por material</div>
-          <div class="resumen-grid" id="resumenGrid"></div>
+        <div class="res-cantos" id="resCantos" style="display:none">
+          <div class="res-tit"><i class="fas fa-ruler"></i> Metros lineales de canto</div>
+          <div class="res-grid" id="resGrid"></div>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
+<!-- MODAL PROYECTO -->
+<div class="modal-overlay" id="modalProy">
+  <div class="modal">
+    <div class="modal-tit"><i class="fas fa-folder-open"></i> Proyecto</div>
+    <div class="modal-fila">
+      <div class="modal-campo"><label>Cliente</label><select id="mCli" onchange="onCambiaCli()"><option value="">Seleccionar...</option></select></div>
+    </div>
+    <div class="modal-fila">
+      <div class="modal-campo"><label>Localidad</label><input type="text" id="mLoc" readonly placeholder="—"></div>
+    </div>
+    <div class="modal-fila">
+      <div class="modal-campo"><label>Nombre del proyecto</label><input type="text" id="mProy" placeholder="Ej: MOB 03 Dormitorio..." list="lstProy"><datalist id="lstProy"></datalist></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-hg gr" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-hg am" onclick="confirmarProy()"><i class="fas fa-check"></i> Confirmar</button>
+    </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ===== CONSTANTES =====
 const DEMASIA = 70;
-const SHEET_ID = '1IWL_c9qRLY5Zm8jZwu1Ybh29Fs3jvHec6uHaAFahmk0';
-const URL_APP = 'https://script.google.com/macros/s/AKfycbwQxs7hRGXhKYLgpR32TR--Xe66hgjo6xFO5jd18mdHcy_3YMAV3QLVUCanAVjNTcxO/exec?p=Index';
+const URL_APP = 'https://script.google.com/macros/s/AKfycbwQxs7hRGXhKYLgpR32TR--Xe66hgjo6xFO5jd18mdHcy_3YMAV3QLVUCanAVjNTcxO/exec';
 
-// ===== ESTADO =====
-let engine, scene, camera;
-let piezas = [], meshes = [];
+let engine, scene, camera, meshes = [];
 let proyecto = { cliente:'', localidad:'', nombre:'', fecha:'' };
+let modulosProyecto = [];
+let todasPiezas = [];
 let clientesData = [];
+let bibSel = null;
 
-// ===== INIT =====
-window.addEventListener('DOMContentLoaded', () => {
-  const canvas = document.getElementById('renderCanvas');
-  engine = new BABYLON.Engine(canvas, true);
-  scene = crearEscena(engine, canvas);
-  engine.runRenderLoop(() => scene && scene.render());
-  window.addEventListener('resize', () => engine.resize());
+// ===== BIBLIOTECA MERCADO ESPAÑOL =====
+const BIB = [
+  { id:'A1', nombre:'Armario columna 600', cat:'Armario', alto:2100, ancho:600, fondo:600, desc:'2 puertas. Estándar dormitorio.', nPuertas:2, nBaldas:2 },
+  { id:'A2', nombre:'Armario columna 900', cat:'Armario', alto:2100, ancho:900, fondo:600, desc:'3 puertas. Estándar dormitorio.', nPuertas:3, nBaldas:2 },
+  { id:'A3', nombre:'Armario columna 1200', cat:'Armario', alto:2100, ancho:1200, fondo:600, desc:'4 puertas. Estándar dormitorio.', nPuertas:4, nBaldas:3 },
+  { id:'A4', nombre:'Armario medio 600', cat:'Armario', alto:1200, ancho:600, fondo:400, desc:'Armario bajo/medio versátil.', nPuertas:2, nBaldas:1 },
+  { id:'A5', nombre:'Armario bajo 600', cat:'Armario', alto:720, ancho:600, fondo:400, desc:'Armario bajo con puertas.', nPuertas:2, nBaldas:1 },
+  { id:'C1', nombre:'Bajo cocina 600', cat:'Cocina', alto:720, ancho:600, fondo:600, desc:'Módulo bajo estándar. 1 puerta.', nPuertas:1, nBaldas:1 },
+  { id:'C2', nombre:'Bajo cocina 400', cat:'Cocina', alto:720, ancho:400, fondo:600, desc:'Módulo bajo estrecho.', nPuertas:1, nBaldas:1 },
+  { id:'C3', nombre:'Bajo cocina 800', cat:'Cocina', alto:720, ancho:800, fondo:600, desc:'Módulo bajo ancho. 2 puertas.', nPuertas:2, nBaldas:1 },
+  { id:'C4', nombre:'Alto cocina 600', cat:'Cocina', alto:2100, ancho:600, fondo:600, desc:'Columna de cocina completa.', nPuertas:4, nBaldas:3 },
+  { id:'C5', nombre:'Columna horno 600', cat:'Cocina', alto:2100, ancho:600, fondo:600, desc:'Columna para horno empotrado.', nPuertas:2, nBaldas:2 },
+  { id:'C6', nombre:'Colgante 600', cat:'Cocina', alto:700, ancho:600, fondo:330, desc:'Módulo colgante. 2 puertas.', nPuertas:2, nBaldas:1 },
+  { id:'C7', nombre:'Colgante 400', cat:'Cocina', alto:700, ancho:400, fondo:330, desc:'Módulo colgante estrecho.', nPuertas:1, nBaldas:1 },
+  { id:'E1', nombre:'Estantería 600', cat:'Estantería', alto:2100, ancho:600, fondo:300, desc:'Estantería abierta. 5 baldas.', nPuertas:0, nBaldas:5 },
+  { id:'E2', nombre:'Estantería 800', cat:'Estantería', alto:2100, ancho:800, fondo:300, desc:'Estantería abierta ancha.', nPuertas:0, nBaldas:5 },
+  { id:'E3', nombre:'Estantería baja 600', cat:'Estantería', alto:900, ancho:600, fondo:300, desc:'Estantería baja. 3 baldas.', nPuertas:0, nBaldas:3 },
+  { id:'E4', nombre:'Mueble TV 1800', cat:'Estantería', alto:500, ancho:1800, fondo:400, desc:'Mueble TV bajo. Con puertas.', nPuertas:2, nBaldas:1 },
+  { id:'K1', nombre:'Cajonera 3 cajones 600', cat:'Cajonera', alto:720, ancho:600, fondo:500, desc:'3 cajones iguales.', nPuertas:0, nBaldas:0 },
+  { id:'K2', nombre:'Cajonera 4 cajones 400', cat:'Cajonera', alto:720, ancho:400, fondo:500, desc:'4 cajones. Módulo estrecho.', nPuertas:0, nBaldas:0 },
+  { id:'K3', nombre:'Cajonera 3 cajones 800', cat:'Cajonera', alto:720, ancho:800, fondo:500, desc:'3 cajones anchos.', nPuertas:0, nBaldas:0 },
+];
 
-  // Leer params de URL si vienen de Apps Script
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('cli')) document.getElementById('selCliente').value = params.get('cli');
-  if (params.get('proy')) document.getElementById('inputProyecto').value = params.get('proy');
-
-  cargarClientesDesdeSheets();
-  setTimeout(() => document.getElementById('loading').classList.add('oculto'), 2200);
-});
-
-// ===== ESCENA =====
-function crearEscena(engine, canvas) {
-  const sc = new BABYLON.Scene(engine);
-  sc.clearColor = new BABYLON.Color4(0.1,0.1,0.1,1);
-
-  camera = new BABYLON.ArcRotateCamera('cam',-Math.PI/4,Math.PI/3.5,25,BABYLON.Vector3.Zero(),sc);
-  camera.attachControl(canvas,true);
-  camera.lowerRadiusLimit=2; camera.upperRadiusLimit=300; camera.wheelDeltaPercentage=0.01;
-
-  const h = new BABYLON.HemisphericLight('h',new BABYLON.Vector3(0,1,0),sc); h.intensity=0.75;
-  const d = new BABYLON.DirectionalLight('d',new BABYLON.Vector3(-1,-2,-1),sc); d.intensity=0.6; d.position=new BABYLON.Vector3(20,40,20);
-
-  const suelo = BABYLON.MeshBuilder.CreateGround('s',{width:200,height:200},sc);
-  const sm = new BABYLON.StandardMaterial('sm',sc);
-  sm.diffuseColor=new BABYLON.Color3(0.12,0.12,0.12); sm.specularColor=new BABYLON.Color3(0,0,0);
-  suelo.material=sm;
-
-  for (let i=-100;i<=100;i+=5) {
-    const a = BABYLON.MeshBuilder.CreateLines('a'+i,{points:[new BABYLON.Vector3(-100,0.01,i),new BABYLON.Vector3(100,0.01,i)]},sc);
-    a.color=new BABYLON.Color3(0.2,0.2,0.2);
-    const b = BABYLON.MeshBuilder.CreateLines('b'+i,{points:[new BABYLON.Vector3(i,0.01,-100),new BABYLON.Vector3(i,0.01,100)]},sc);
-    b.color=new BABYLON.Color3(0.2,0.2,0.2);
-  }
-  return sc;
-}
-
-// ===== COLORES =====
-const COLORES = {'blanco':'#F0F0EC','blanco brillo':'#FFFFFF','blanco mate':'#E8E8E4','negro':'#1A1A1A','negro mate':'#222','roble':'#8B6914','nogal':'#5C3D11','haya':'#C4956A','gris':'#9E9E9E','gris claro':'#D4D4D4','gris oscuro':'#616161','azul':'#1565C0','verde':'#2E7D32','rojo':'#C62828','antracita':'#37474F','aluminio':'#90A4AE','natural':'#A0784A','pino':'#D4A76A','cerezo':'#8B2500','wengue':'#3D2314'};
+const COLORES = {'blanco':'#F0F0EC','blanco brillo':'#FFFFFF','blanco mate':'#E8E8E4','negro':'#1A1A1A','negro mate':'#222','roble':'#8B6914','nogal':'#5C3D11','haya':'#C4956A','gris':'#9E9E9E','gris claro':'#D4D4D4','gris oscuro':'#616161','antracita':'#37474F','aluminio':'#90A4AE','natural':'#A0784A','pino':'#D4A76A','cerezo':'#8B2500','wengue':'#3D2314'};
 
 function colorMat(mat) {
   if (!mat) return '#AAAAAA';
@@ -444,135 +375,170 @@ function colorMat(mat) {
   for (const [n,h] of Object.entries(COLORES)) if (k.includes(n)) return h;
   return '#BBBBAA';
 }
-function hex3(hex) { return new BABYLON.Color3(parseInt(hex.slice(1,3),16)/255,parseInt(hex.slice(3,5),16)/255,parseInt(hex.slice(5,7),16)/255); }
+function hex3(h) { return new BABYLON.Color3(parseInt(h.slice(1,3),16)/255,parseInt(h.slice(3,5),16)/255,parseInt(h.slice(5,7),16)/255); }
 
-// ===== CANTO =====
-// L1=1 pasada largo+70 | L2=2 pasadas largo+140 | A1=1 pasada ancho+70 | A2=2 pasadas ancho+140
-function mmCanto(p) {
-  const lg=parseFloat(p.ALTO)||0, an=parseFloat(p.ANCHO)||0;
-  const lc=(p['LARGO.CANTO']||'').toUpperCase().trim();
-  const ac=(p['ANCHO.CANTO']||'').toUpperCase().trim();
+function mmCanto(largo, ancho, cantos) {
+  const s = (cantos||'').toUpperCase();
+  const lc = s.includes('L2')?'L2':s.includes('L1')?'L1':'';
+  const ac = s.includes('A2')?'A2':s.includes('A1')?'A1':'';
   let t=0;
-  if(lc==='L1') t+=lg+DEMASIA;
-  if(lc==='L2') t+=(lg*2)+(DEMASIA*2);
-  if(ac==='A1') t+=an+DEMASIA;
-  if(ac==='A2') t+=(an*2)+(DEMASIA*2);
+  if(lc==='L1') t+=largo+DEMASIA;
+  if(lc==='L2') t+=(largo*2)+(DEMASIA*2);
+  if(ac==='A1') t+=ancho+DEMASIA;
+  if(ac==='A2') t+=(ancho*2)+(DEMASIA*2);
   return t;
 }
 
-// ===== CLIENTES DESDE SHEETS =====
-async function cargarClientesDesdeSheets() {
-  try {
-    const url = `${URL_APP}&action=getClientes&sheetId=${SHEET_ID}`;
-    const r = await fetch(url);
-    const d = await r.json();
-    clientesData = d.clientes || [];
-    const sel = document.getElementById('selCliente');
-    clientesData.forEach(c => sel.add(new Option(c.CLIENTE, c.CLIENTE)));
-  } catch(e) {
-    console.log('Sin conexión a clientes, modo manual activo');
+// ===== CALCULAR PIEZAS =====
+function calcularPiezas(mod, cfg) {
+  const gr=cfg.grueso, grR=cfg.respaldo, mat=cfg.material||'Blanco mate', matP=cfg.matPuertas||mat;
+  const iAncho=cfg.ancho-(gr*2), iAlto=cfg.alto-(gr*2), iFondo=cfg.fondo-grR;
+  const cantos=cfg.cantos;
+  let p=[];
+  p.push({nombre:'Costado izquierdo',largo:cfg.alto,ancho:cfg.fondo,grueso:gr,material:mat,cantos});
+  p.push({nombre:'Costado derecho',largo:cfg.alto,ancho:cfg.fondo,grueso:gr,material:mat,cantos});
+  p.push({nombre:'Techo',largo:iAncho,ancho:cfg.fondo,grueso:gr,material:mat,cantos});
+  p.push({nombre:'Suelo',largo:iAncho,ancho:cfg.fondo,grueso:gr,material:mat,cantos});
+  p.push({nombre:'Respaldo',largo:iAncho,ancho:iAlto,grueso:grR,material:mat,cantos:''});
+  for(let b=1;b<=cfg.baldas;b++) p.push({nombre:`Balda ${b}`,largo:iAncho,ancho:iFondo,grueso:gr,material:mat,cantos});
+  if(cfg.puertas==='si' && mod.nPuertas>0) {
+    const aP=Math.round(cfg.ancho/mod.nPuertas);
+    for(let i=1;i<=mod.nPuertas;i++) p.push({nombre:`Puerta ${i}`,largo:cfg.alto,ancho:aP,grueso:gr,material:matP,cantos});
+  } else if(cfg.puertas==='corredera' && mod.nPuertas>0) {
+    for(let i=1;i<=2;i++) p.push({nombre:`Puerta corredera ${i}`,largo:cfg.alto-10,ancho:Math.round(cfg.ancho/2)+40,grueso:gr,material:matP,cantos});
   }
+  return p.map(x=>({...x,modulo:cfg.nombre,nMod:cfg.num}));
 }
 
-function onCambiaCliente() {
-  const cli = document.getElementById('selCliente').value;
-  const found = clientesData.find(c=>c.CLIENTE===cli);
-  document.getElementById('inputLocalidad').value = found ? (found.LOCALIDAD||'') : '';
-  document.getElementById('inputProyecto').value = '';
-  if (cli) cargarProyectosCliente(cli);
+function getCantos() {
+  return ['ckL1','ckL2','ckA1','ckA2'].filter(id=>document.getElementById(id).checked).map(id=>id.replace('ck','')).join('-');
 }
 
-async function cargarProyectosCliente(cli) {
-  try {
-    const url = `${URL_APP}&action=getProyectos3D&cliente=${encodeURIComponent(cli)}&sheetId=${SHEET_ID}`;
-    const r = await fetch(url);
-    const d = await r.json();
-    const lista = document.getElementById('listaProyectos');
-    lista.innerHTML = '';
-    (d.proyectos||[]).forEach(p => lista.innerHTML+=`<option value="${p}">`);
-  } catch(e) {}
+function añadirModulo() {
+  if(!bibSel){showToast('⚠ Selecciona un módulo');return;}
+  if(!proyecto.nombre){showToast('⚠ Selecciona un proyecto primero');abrirModalProyecto();return;}
+  const num = modulosProyecto.length+1;
+  const cfg = {
+    num, nombre:bibSel.nombre,
+    alto:parseInt(document.getElementById('cfAlto').value)||bibSel.alto,
+    ancho:parseInt(document.getElementById('cfAncho').value)||bibSel.ancho,
+    fondo:parseInt(document.getElementById('cfFondo').value)||bibSel.fondo,
+    grueso:parseInt(document.getElementById('cfGrueso').value)||18,
+    respaldo:parseInt(document.getElementById('cfRespaldo').value)||8,
+    baldas:parseInt(document.getElementById('cfBaldas').value)||0,
+    material:document.getElementById('cfMaterial').value||'Blanco mate',
+    matPuertas:document.getElementById('cfPuertas').value||'',
+    puertas:document.getElementById('cfPuertas2').value,
+    cantos:getCantos(),
+  };
+  const piezas = calcularPiezas(bibSel, cfg);
+  modulosProyecto.push({num, mod:bibSel, cfg, piezas});
+  todasPiezas = modulosProyecto.flatMap(m=>m.piezas);
+  renderListaMods(); renderPiezasCalc(); dibujar3D(); generarDespiece(); generarBoceto(); actualizarStats();
+  document.getElementById('btnGuardar').style.display='flex';
+  showToast(`✅ ${bibSel.nombre} añadido (${piezas.length} piezas)`);
 }
 
-// ===== CARGAR PROYECTO =====
-async function cargarProyecto() {
-  const cli = document.getElementById('selCliente').value;
-  const proy = document.getElementById('inputProyecto').value.trim();
-  if (!cli||!proy) { showToast('⚠ Selecciona cliente y proyecto'); return; }
-  showToast('⏳ Cargando piezas...');
-  try {
-    const url = `${URL_APP}&action=getMuebles3D&cliente=${encodeURIComponent(cli)}&proyecto=${encodeURIComponent(proy)}&sheetId=${SHEET_ID}`;
-    const r = await fetch(url);
-    const d = await r.json();
-    if (d&&d.piezas&&d.piezas.length) {
-      cargarDatos(d.piezas, cli, document.getElementById('inputLocalidad').value, proy);
-    } else {
-      showToast('⚠ Sin piezas 3D para ese proyecto. Prueba "Ver ejemplo".');
-    }
-  } catch(e) {
-    showToast('⚠ Error de conexión. Usa "Ver ejemplo" para probar.');
-  }
+function borrarModulo(i) {
+  modulosProyecto.splice(i,1);
+  modulosProyecto.forEach((m,j)=>{m.num=j+1;m.cfg.num=j+1;m.piezas.forEach(p=>p.nMod=j+1);});
+  todasPiezas=modulosProyecto.flatMap(m=>m.piezas);
+  renderListaMods(); renderPiezasCalc(); dibujar3D(); generarDespiece(); generarBoceto(); actualizarStats();
+  if(!modulosProyecto.length) document.getElementById('btnGuardar').style.display='none';
 }
 
-function cargarEjemplo() {
-  const ej = [
-    {PIEZA:'Costado izquierdo', ALTO:2100,ANCHO:600, GRUESO:18, X:0,  Y:0,   Z:0,   MATERIAL:'Blanco mate',  'COLOR.CANTO':'Blanco','LARGO.CANTO':'L2','ANCHO.CANTO':'A1'},
-    {PIEZA:'Costado derecho',   ALTO:2100,ANCHO:600, GRUESO:18, X:582,Y:0,   Z:0,   MATERIAL:'Blanco mate',  'COLOR.CANTO':'Blanco','LARGO.CANTO':'L2','ANCHO.CANTO':'A1'},
-    {PIEZA:'Techo',             ALTO:564, ANCHO:18,  GRUESO:600,X:18, Y:2082,Z:0,   MATERIAL:'Blanco mate',  'COLOR.CANTO':'Blanco','LARGO.CANTO':'L2','ANCHO.CANTO':''},
-    {PIEZA:'Suelo',             ALTO:564, ANCHO:18,  GRUESO:600,X:18, Y:0,   Z:0,   MATERIAL:'Blanco mate',  'COLOR.CANTO':'Blanco','LARGO.CANTO':'L2','ANCHO.CANTO':''},
-    {PIEZA:'Balda',             ALTO:564, ANCHO:18,  GRUESO:580,X:18, Y:1050,Z:10,  MATERIAL:'Blanco mate',  'COLOR.CANTO':'Blanco','LARGO.CANTO':'L2','ANCHO.CANTO':''},
-    {PIEZA:'Respaldo',          ALTO:2064,ANCHO:564, GRUESO:8,  X:18, Y:18,  Z:592, MATERIAL:'Blanco mate',  'COLOR.CANTO':'',      'LARGO.CANTO':'', 'ANCHO.CANTO':''},
-    {PIEZA:'Puerta izquierda',  ALTO:2100,ANCHO:300, GRUESO:18, X:0,  Y:0,   Z:-20, MATERIAL:'Blanco brillo','COLOR.CANTO':'Blanco','LARGO.CANTO':'L2','ANCHO.CANTO':'A2'},
-    {PIEZA:'Puerta derecha',    ALTO:2100,ANCHO:300, GRUESO:18, X:300,Y:0,   Z:-20, MATERIAL:'Blanco brillo','COLOR.CANTO':'Blanco','LARGO.CANTO':'L2','ANCHO.CANTO':'A2'},
-  ];
-  cargarDatos(ej,'Cliente Ejemplo','Madrid','Armario Dormitorio');
+function renderListaMods() {
+  const c=document.getElementById('listaModulos');
+  if(!modulosProyecto.length){c.innerHTML='<div class="empty-msg">Sin módulos</div>';document.getElementById('statsBlk').style.display='none';return;}
+  c.innerHTML=modulosProyecto.map((m,i)=>`
+    <div class="modulo-item">
+      <div class="mod-num">${m.num}</div>
+      <div style="flex:1;min-width:0">
+        <div class="mod-nombre">${m.mod.nombre}</div>
+        <div class="mod-dim">${m.cfg.alto}×${m.cfg.ancho}×${m.cfg.fondo} · ${m.cfg.material}</div>
+      </div>
+      <span class="mod-del" onclick="borrarModulo(${i})"><i class="fas fa-trash-alt"></i></span>
+    </div>`).join('');
+  document.getElementById('statsBlk').style.display='block';
 }
 
-function cargarDatos(data,cli,loc,proy) {
-  piezas=data;
-  proyecto={cliente:cli,localidad:loc,nombre:proy,fecha:new Date().toLocaleDateString('es-ES')};
-  document.getElementById('badgeProyecto').textContent=`${cli} — ${proy}`;
-  dibujar3D(data);
-  renderLista(data);
-  actualizarStats(data);
-  generarDespiece(data);
-  generarPlanos2D(data);
-  showToast(`✅ ${data.length} piezas cargadas`);
+function renderPiezasCalc() {
+  const tb=document.getElementById('piezasTb');
+  if(!todasPiezas.length){document.getElementById('piezasCalc').style.display='none';return;}
+  document.getElementById('piezasCalc').style.display='block';
+  tb.innerHTML=todasPiezas.map((p,i)=>`<tr>
+    <td>${i+1}</td>
+    <td style="color:#ffb800;font-size:10px">${p.modulo}</td>
+    <td><b>${p.nombre}</b></td>
+    <td>${p.largo}</td><td>${p.ancho}</td><td>${p.grueso}</td>
+    <td>${p.material}</td>
+    <td style="color:#00bcff;font-weight:700">${p.cantos||'—'}</td>
+  </tr>`).join('');
+}
+
+function actualizarStats() {
+  document.getElementById('stMod').textContent=modulosProyecto.length;
+  document.getElementById('stPiezas').textContent=todasPiezas.length;
+  const t=todasPiezas.reduce((a,p)=>a+mmCanto(p.largo,p.ancho,p.cantos||''),0);
+  document.getElementById('stCanto').textContent=(t/1000).toFixed(2)+' m';
 }
 
 // ===== 3D =====
-function dibujar3D(data) {
+function crearEscena(engine,canvas) {
+  const sc=new BABYLON.Scene(engine);
+  sc.clearColor=new BABYLON.Color4(0.1,0.1,0.1,1);
+  camera=new BABYLON.ArcRotateCamera('c',-Math.PI/4,Math.PI/3.5,25,BABYLON.Vector3.Zero(),sc);
+  camera.attachControl(canvas,true); camera.lowerRadiusLimit=2; camera.upperRadiusLimit=300; camera.wheelDeltaPercentage=0.01;
+  const h=new BABYLON.HemisphericLight('h',new BABYLON.Vector3(0,1,0),sc); h.intensity=0.75;
+  const d=new BABYLON.DirectionalLight('d',new BABYLON.Vector3(-1,-2,-1),sc); d.intensity=0.6; d.position=new BABYLON.Vector3(20,40,20);
+  const s=BABYLON.MeshBuilder.CreateGround('s',{width:200,height:200},sc);
+  const sm=new BABYLON.StandardMaterial('sm',sc); sm.diffuseColor=new BABYLON.Color3(0.12,0.12,0.12); sm.specularColor=new BABYLON.Color3(0,0,0); s.material=sm;
+  for(let i=-100;i<=100;i+=5){
+    const a=BABYLON.MeshBuilder.CreateLines('a'+i,{points:[new BABYLON.Vector3(-100,0.01,i),new BABYLON.Vector3(100,0.01,i)]},sc); a.color=new BABYLON.Color3(0.2,0.2,0.2);
+    const b=BABYLON.MeshBuilder.CreateLines('b'+i,{points:[new BABYLON.Vector3(i,0.01,-100),new BABYLON.Vector3(i,0.01,100)]},sc); b.color=new BABYLON.Color3(0.2,0.2,0.2);
+  }
+  return sc;
+}
+
+function dibujar3D() {
   meshes.forEach(m=>m.dispose()); meshes=[];
-  const E=0.01;
-  data.forEach((p,i)=>{
-    const an=(parseFloat(p.ANCHO)||100)*E, al=(parseFloat(p.ALTO)||100)*E, gr=(parseFloat(p.GRUESO)||18)*E;
-    const x=(parseFloat(p.X)||0)*E, y=(parseFloat(p.Y)||0)*E, z=(parseFloat(p.Z)||0)*E;
-    const box=BABYLON.MeshBuilder.CreateBox(`p${i}`,{width:an,height:al,depth:gr},scene);
-    box.position=new BABYLON.Vector3(x+an/2,y+al/2,z+gr/2);
-    const mat=new BABYLON.StandardMaterial(`m${i}`,scene);
-    mat.diffuseColor=hex3(colorMat(p.MATERIAL));
-    mat.specularColor=new BABYLON.Color3(0.05,0.05,0.05);
-    box.material=mat;
-    box.enableEdgesRendering(); box.edgesWidth=1.5; box.edgesColor=new BABYLON.Color4(0.15,0.15,0.15,0.6);
-    box.actionManager=new BABYLON.ActionManager(scene);
-    box.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger,()=>selPieza(i)));
-    meshes.push(box);
+  if(!modulosProyecto.length) return;
+  const E=0.01; let ox=0;
+  modulosProyecto.forEach((m,mi)=>{
+    const {alto,ancho,fondo,grueso:gr,respaldo:grR}=m.cfg;
+    const col=hex3(colorMat(m.cfg.material));
+    const colP=hex3(colorMat(m.cfg.matPuertas||m.cfg.material));
+    const iA=ancho-gr*2;
+    const addBox=(w,h,d,x,y,z,c,ew=1.5)=>{
+      const box=BABYLON.MeshBuilder.CreateBox(`b${mi}_${meshes.length}`,{width:w*E,height:h*E,depth:d*E},scene);
+      box.position=new BABYLON.Vector3((ox+x+w/2)*E,(y+h/2)*E,(z+d/2)*E);
+      const mat=new BABYLON.StandardMaterial(`m${meshes.length}`,scene); mat.diffuseColor=c; mat.specularColor=new BABYLON.Color3(0.05,0.05,0.05); box.material=mat;
+      box.enableEdgesRendering(); box.edgesWidth=ew; box.edgesColor=new BABYLON.Color4(0.12,0.12,0.12,0.7);
+      meshes.push(box);
+    };
+    addBox(gr,alto,fondo,0,0,0,col);
+    addBox(gr,alto,fondo,ancho-gr,0,0,col);
+    addBox(iA,gr,fondo,gr,alto-gr,0,col);
+    addBox(iA,gr,fondo,gr,0,0,col);
+    addBox(iA,alto-gr*2,grR,gr,gr,fondo-grR,col,1);
+    for(let b=1;b<=(m.cfg.baldas||0);b++){
+      const yB=gr+(b*(alto-gr*2)/(m.cfg.baldas+1));
+      addBox(iA,gr,fondo-grR-5,gr,yB,2,col);
+    }
+    if(m.cfg.puertas==='si' && m.mod.nPuertas>0){
+      const aP=ancho/m.mod.nPuertas;
+      for(let p=0;p<m.mod.nPuertas;p++) addBox(aP,alto,gr,p*aP,0,-gr,colP,2);
+    } else if(m.cfg.puertas==='corredera' && m.mod.nPuertas>0){
+      for(let p=0;p<2;p++) addBox(ancho/2+40,alto-10,gr,p*(ancho/2-20),0,-gr*p*0.5,colP,2);
+    }
+    ox+=ancho+10;
   });
   centrarCamara();
 }
 
-function selPieza(idx) {
-  meshes.forEach((m,i)=>{
-    m.edgesColor=i===idx?new BABYLON.Color4(1,0.72,0,1):new BABYLON.Color4(0.15,0.15,0.15,0.6);
-    m.edgesWidth=i===idx?3.5:1.5;
-  });
-  document.querySelectorAll('.pieza-item').forEach((el,i)=>el.classList.toggle('activa',i===idx));
-}
-
-// ===== CÁMARA =====
-function setVista(tipo) {
+function setVista(t) {
   const v={perspectiva:{a:-Math.PI/4,b:Math.PI/3.5,r:25,l:'Perspectiva'},frente:{a:Math.PI,b:Math.PI/2,r:30,l:'Alzado'},lateral:{a:Math.PI/2,b:Math.PI/2,r:30,l:'Perfil'},planta:{a:0,b:0.01,r:30,l:'Planta'}};
-  const c=v[tipo]||v.perspectiva;
-  camera.alpha=c.a; camera.beta=c.b; camera.radius=c.r;
+  const c=v[t]||v.perspectiva; camera.alpha=c.a; camera.beta=c.b; camera.radius=c.r;
   document.getElementById('vistaActual').textContent=c.l;
 }
 function centrarCamara() {
@@ -582,145 +548,204 @@ function centrarCamara() {
   camera.target=new BABYLON.Vector3(cx/meshes.length,cy/meshes.length/2,cz/meshes.length);
 }
 
-// ===== LISTA PIEZAS =====
-function renderLista(data) {
-  const c=document.getElementById('listaPiezas'); c.innerHTML='';
-  data.forEach((p,i)=>{
-    const lc=p['LARGO.CANTO']||'', ac=p['ANCHO.CANTO']||'';
-    const div=document.createElement('div'); div.className='pieza-item';
-    div.innerHTML=`
-      <div class="pieza-dot" style="background:${colorMat(p.MATERIAL)}"></div>
-      <div style="flex:1;min-width:0">
-        <div class="pieza-nombre">${p.PIEZA||`Pieza ${i+1}`}</div>
-        <div class="pieza-dim">${p.ALTO}×${p.ANCHO}×${p.GRUESO} mm · ${p.MATERIAL||'—'}</div>
-        <div>
-          ${lc?`<span class="canto-tag">${lc}</span>`:''}
-          ${ac?`<span class="canto-tag">${ac}</span>`:''}
-        </div>
-      </div>`;
-    div.onclick=()=>selPieza(i); c.appendChild(div);
+// ===== BOCETO =====
+function generarBoceto() {
+  const svg=document.getElementById('svgBoceto'); svg.innerHTML='';
+  document.getElementById('bocMeta').textContent=proyecto.nombre?`${proyecto.cliente} — ${proyecto.nombre} — ${proyecto.localidad}`:'—';
+  if(!modulosProyecto.length) return;
+  const W=svg.clientWidth||800, H=320, PAD=50, ns='http://www.w3.org/2000/svg';
+  svg.setAttribute('height',H);
+  const anchoT=modulosProyecto.reduce((a,m)=>a+m.cfg.ancho,0)+(modulosProyecto.length-1)*10;
+  const altoM=Math.max(...modulosProyecto.map(m=>m.cfg.alto));
+  const sc=Math.min((W-PAD*2)/anchoT,(H-PAD*2-30)/altoM);
+  const addEl=(tag,attrs,txt)=>{const el=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));if(txt!==undefined)el.textContent=txt;svg.appendChild(el);return el;};
+  addEl('rect',{width:W,height:H,fill:'#1e1e1e'});
+  let ox=PAD; const ley=[];
+  modulosProyecto.forEach(m=>{
+    const w=m.cfg.ancho*sc,h=m.cfg.alto*sc,y=PAD+(altoM-m.cfg.alto)*sc,col=colorMat(m.cfg.material);
+    addEl('rect',{x:ox,y,width:w,height:h,fill:col,'fill-opacity':'0.75',stroke:'#ffb800','stroke-width':'1.5'});
+    if(m.cfg.puertas==='si'&&m.mod.nPuertas>0){
+      const wp=w/m.mod.nPuertas;
+      for(let p=0;p<m.mod.nPuertas;p++) addEl('line',{x1:ox+p*wp,y1:y,x2:ox+p*wp,y2:y+h,stroke:'rgba(0,0,0,0.3)','stroke-width':'1'});
+    }
+    addEl('circle',{cx:ox+w/2,cy:y+h/2,r:'13',fill:'#ffb800'});
+    addEl('text',{x:ox+w/2,y:y+h/2+4,'text-anchor':'middle','font-size':'12','font-weight':'bold',fill:'black','font-family':'Segoe UI,sans-serif'},m.num);
+    const cy2=y+h+13;
+    addEl('line',{x1:ox,y1:cy2,x2:ox+w,y2:cy2,stroke:'#ffb800','stroke-width':'0.8'});
+    addEl('text',{x:ox+w/2,y:cy2+10,'text-anchor':'middle','font-size':'9',fill:'#ffb800','font-family':'Segoe UI,sans-serif'},`${m.cfg.ancho}mm`);
+    ley.push(`<span style="display:inline-flex;align-items:center;gap:5px;margin-right:12px;font-size:11px;margin-bottom:4px">
+      <span style="width:10px;height:10px;border-radius:2px;background:${col};border:1px solid #ffb800;flex-shrink:0"></span>
+      <b style="color:#ffb800">${m.num}</b> ${m.mod.nombre} — ${m.cfg.alto}×${m.cfg.ancho}×${m.cfg.fondo}mm · ${m.cfg.material}
+    </span>`);
+    ox+=w+10*sc;
   });
-}
-
-// ===== STATS =====
-function actualizarStats(data) {
-  document.getElementById('statPiezas').textContent=data.length;
-  const mats=[...new Set(data.map(p=>p.MATERIAL).filter(Boolean))];
-  document.getElementById('statMateriales').textContent=mats.length?mats.slice(0,2).join(', ')+(mats.length>2?'...':''):'—';
-  const total=data.reduce((a,p)=>a+mmCanto(p),0);
-  document.getElementById('statCanto').textContent=(total/1000).toFixed(2)+' m';
+  addEl('line',{x1:PAD-20,y1:PAD,x2:PAD-20,y2:PAD+altoM*sc,stroke:'#aaa','stroke-width':'0.8'});
+  addEl('text',{transform:`rotate(-90,${PAD-28},${PAD+altoM*sc/2})`,x:PAD-28,y:PAD+altoM*sc/2,'text-anchor':'middle','font-size':'9',fill:'#aaa','font-family':'Segoe UI,sans-serif'},`${altoM}mm`);
+  document.getElementById('leyendaBoc').innerHTML=`<div style="margin-top:8px;padding:9px;background:#2c2c2c;border-radius:6px;border:1px solid #444;display:flex;flex-wrap:wrap">${ley.join('')}</div>`;
 }
 
 // ===== DESPIECE =====
-function generarDespiece(data) {
-  const tb=document.getElementById('despTbody');
+function generarDespiece() {
+  const tb=document.getElementById('despTb');
+  if(!todasPiezas.length){tb.innerHTML='<tr><td colspan="9" style="text-align:center;color:#555;padding:16px">Sin datos</td></tr>';document.getElementById('resCantos').style.display='none';return;}
   document.getElementById('despMeta').textContent=`${proyecto.cliente} — ${proyecto.nombre} — ${proyecto.localidad} — ${proyecto.fecha}`;
-  tb.innerHTML='';
-  data.forEach((p,i)=>{
-    const mm=mmCanto(p);
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td>${i+1}</td>
-      <td><b>${p.PIEZA||`Pieza ${i+1}`}</b></td>
-      <td>${p.ALTO}</td><td>${p.ANCHO}</td><td>${p.GRUESO}</td>
-      <td>${p.MATERIAL||'—'}</td>
-      <td style="color:#00bcff;font-weight:700">${p['LARGO.CANTO']||'—'}</td>
-      <td style="color:#00bcff;font-weight:700">${p['ANCHO.CANTO']||'—'}</td>
-      <td>${p['COLOR.CANTO']||'—'}</td>
-      <td style="color:#ffb800;font-weight:700">${(mm/1000).toFixed(3)} m</td>`;
-    tb.appendChild(tr);
-  });
-
+  tb.innerHTML=todasPiezas.map((p,i)=>{
+    const mm=mmCanto(p.largo,p.ancho,p.cantos||'');
+    return `<tr><td>${i+1}</td><td style="color:#ffb800;font-size:10px">${p.modulo}</td><td><b>${p.nombre}</b></td>
+    <td>${p.largo}</td><td>${p.ancho}</td><td>${p.grueso}</td><td>${p.material}</td>
+    <td style="color:#00bcff;font-weight:700">${p.cantos||'—'}</td>
+    <td style="color:#ffb800;font-weight:700">${(mm/1000).toFixed(3)} m</td></tr>`;
+  }).join('');
   const pm={};
-  data.forEach(p=>{
-    const m=p['COLOR.CANTO']||p.MATERIAL||'Sin especificar';
-    if(!pm[m]) pm[m]=0; pm[m]+=mmCanto(p);
-  });
-  const grid=document.getElementById('resumenGrid'); grid.innerHTML='';
+  todasPiezas.forEach(p=>{const m=p.material||'Sin especificar';if(!pm[m])pm[m]=0;pm[m]+=mmCanto(p.largo,p.ancho,p.cantos||'');});
+  const grid=document.getElementById('resGrid'); grid.innerHTML='';
   Object.entries(pm).forEach(([m,mm])=>{
-    if(mm<=0) return;
-    const d=document.createElement('div'); d.className='resumen-item';
-    d.innerHTML=`<div class="res-mat">${m}</div><div class="res-metros">${(mm/1000).toFixed(2)}<span class="res-unit"> m</span></div>`;
+    if(mm<=0)return;
+    const d=document.createElement('div'); d.className='res-item';
+    d.innerHTML=`<div class="res-mat">${m}</div><div class="res-m">${(mm/1000).toFixed(2)}<span class="res-u"> m</span></div>`;
     grid.appendChild(d);
   });
-  document.getElementById('resumenCantos').style.display='block';
+  document.getElementById('resCantos').style.display='block';
 }
 
-// ===== PLANOS 2D =====
-function generarPlanos2D(data) {
-  if(!data.length) return;
-  document.getElementById('infoPlano').innerHTML=`
-    <b style="color:#ffb800">Cliente:</b> ${proyecto.cliente}<br>
-    <b style="color:#ffb800">Localidad:</b> ${proyecto.localidad}<br>
-    <b style="color:#ffb800">Proyecto:</b> ${proyecto.nombre}<br>
-    <b style="color:#ffb800">Fecha:</b> ${proyecto.fecha}<br>
-    <b style="color:#ffb800">Total piezas:</b> ${data.length}`;
-  ['svgAlzado','svgPlanta','svgPerfil'].forEach((id,vi)=>dibujarSVG(id,data,['alzado','planta','perfil'][vi]));
+// ===== GUARDAR EN CORTES =====
+async function guardarEnCortes() {
+  if(!todasPiezas.length){showToast('⚠ No hay piezas');return;}
+  if(!proyecto.nombre){showToast('⚠ Selecciona un proyecto');abrirModalProyecto();return;}
+  showToast('⏳ Guardando en CORTES...');
+  const filas=todasPiezas.map(p=>({
+    fecha:new Date().toLocaleDateString('es-ES'),
+    proyecto:proyecto.nombre,
+    cantidad:1,
+    pieza:`[${p.nMod}] ${p.nombre}`,
+    largo:p.largo, ancho:p.ancho, grueso:p.grueso,
+    cantos:p.cantos||'',
+    color:p.material,
+    cliente:proyecto.cliente,
+    localidad:proyecto.localidad,
+    observaciones:''
+  }));
+  try {
+    const url=`${URL_APP}?p=api&action=guardarCortes3D`;
+    const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filas})});
+    const d=await r.json();
+    if(d.ok) showToast(`✅ ${filas.length} piezas guardadas en CORTES`);
+    else showToast('⚠ '+(d.error||'Error al guardar'));
+  } catch(e) {
+    showToast('⚠ Error de conexión. Las piezas están calculadas correctamente.');
+  }
 }
 
-function dibujarSVG(id,data,vista) {
-  const svg=document.getElementById(id); svg.innerHTML='';
-  const W=svg.clientWidth||320, H=svg.clientHeight||240, PAD=32;
-  let mnX=Infinity,mxX=-Infinity,mnY=Infinity,mxY=-Infinity;
-  data.forEach(p=>{
-    const px=parseFloat(p.X)||0,py=parseFloat(p.Y)||0,pz=parseFloat(p.Z)||0;
-    const pw=parseFloat(p.ANCHO)||0,ph=parseFloat(p.ALTO)||0,pd=parseFloat(p.GRUESO)||0;
-    let x1,x2,y1,y2;
-    if(vista==='alzado'){x1=px;x2=px+pw;y1=py;y2=py+ph;}
-    else if(vista==='planta'){x1=px;x2=px+pw;y1=pz;y2=pz+pd;}
-    else{x1=pz;x2=pz+pd;y1=py;y2=py+ph;}
-    mnX=Math.min(mnX,x1);mxX=Math.max(mxX,x2);mnY=Math.min(mnY,y1);mxY=Math.max(mxY,y2);
-  });
-  const rX=mxX-mnX||1,rY=mxY-mnY||1;
-  const sc=Math.min((W-PAD*2)/rX,(H-PAD*2)/rY);
-  const oX=PAD+(W-PAD*2-rX*sc)/2-mnX*sc, oY=PAD+(H-PAD*2-rY*sc)/2-mnY*sc;
-  const ns='http://www.w3.org/2000/svg';
-  const bg=document.createElementNS(ns,'rect'); bg.setAttribute('width',W); bg.setAttribute('height',H); bg.setAttribute('fill','#1e1e1e'); svg.appendChild(bg);
-  data.forEach(p=>{
-    const px=parseFloat(p.X)||0,py=parseFloat(p.Y)||0,pz=parseFloat(p.Z)||0;
-    const pw=parseFloat(p.ANCHO)||0,ph=parseFloat(p.ALTO)||0,pd=parseFloat(p.GRUESO)||0;
-    let rx,ry,rw,rh;
-    if(vista==='alzado'){rx=px;ry=mxY-(py+ph);rw=pw;rh=ph;}
-    else if(vista==='planta'){rx=px;ry=pz;rw=pw;rh=pd;}
-    else{rx=pz;ry=mxY-(py+ph);rw=pd;rh=ph;}
-    const r=document.createElementNS(ns,'rect');
-    r.setAttribute('x',rx*sc+oX); r.setAttribute('y',ry*sc+oY);
-    r.setAttribute('width',Math.max(rw*sc,1)); r.setAttribute('height',Math.max(rh*sc,1));
-    r.setAttribute('fill',colorMat(p.MATERIAL)); r.setAttribute('fill-opacity','0.85');
-    r.setAttribute('stroke','#ffb800'); r.setAttribute('stroke-width','0.8');
-    svg.appendChild(r);
-  });
-  // Cotas
-  const addL=(x1,y1,x2,y2)=>{const l=document.createElementNS(ns,'line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);l.setAttribute('stroke','#ffb800');l.setAttribute('stroke-width','0.8');svg.appendChild(l);};
-  const addT=(x,y,txt,rot)=>{const t=document.createElementNS(ns,'text');t.setAttribute('fill','#ffb800');t.setAttribute('font-size','8');t.setAttribute('font-family','Segoe UI,sans-serif');t.setAttribute('font-weight','700');t.setAttribute('text-anchor','middle');if(rot)t.setAttribute('transform',`rotate(-90,${x},${y})`);t.setAttribute('x',x);t.setAttribute('y',y);t.textContent=txt;svg.appendChild(t);};
-  addL(PAD,H-10,W-PAD,H-10); addT((PAD+W-PAD)/2,H-3,`${Math.round(rX)} mm`,false);
-  addL(10,PAD,10,H-PAD); addT(10,(PAD+H-PAD)/2,`${Math.round(rY)} mm`,true);
+// ===== BIBLIOTECA =====
+function renderBib(filtro) {
+  const c=document.getElementById('listaBiblioteca');
+  const items=filtro==='todos'?BIB:BIB.filter(m=>m.cat===filtro);
+  c.innerHTML=items.map(m=>`
+    <div class="bib-item" id="bib_${m.id}" onclick="selBib('${m.id}')">
+      <div class="bib-cat">${m.cat}</div>
+      <div class="bib-nombre">${m.nombre}</div>
+      <div class="bib-dim">${m.alto}×${m.ancho}×${m.fondo} mm</div>
+      <div class="bib-desc">${m.desc}</div>
+    </div>`).join('');
+}
+
+function filtrarBib(cat,btn) {
+  document.querySelectorAll('.filt-btn').forEach(b=>b.classList.remove('activo'));
+  btn.classList.add('activo');
+  renderBib(cat);
+}
+
+function selBib(id) {
+  bibSel=BIB.find(m=>m.id===id);
+  if(!bibSel) return;
+  document.getElementById('configModulo').style.display='block';
+  document.getElementById('msgDiseno').style.display='none';
+  document.getElementById('cfgTitulo').textContent=bibSel.nombre;
+  document.getElementById('cfAlto').value=bibSel.alto;
+  document.getElementById('cfAncho').value=bibSel.ancho;
+  document.getElementById('cfFondo').value=bibSel.fondo;
+  document.getElementById('cfBaldas').value=bibSel.nBaldas;
+  document.getElementById('cfPuertas2').value=bibSel.nPuertas>0?'si':'no';
+  document.querySelectorAll('.bib-item').forEach(el=>el.classList.remove('sel'));
+  const el=document.getElementById('bib_'+id); if(el) el.classList.add('sel');
+}
+
+async function cargarTableros() {
+  const mats=['Blanco mate','Blanco brillo','Roble natural','Nogal oscuro','Gris antracita','Negro mate','Haya','Pino natural'];
+  try {
+    const url=`${URL_APP}?p=api&action=getTableros`;
+    const r=await fetch(url); const d=await r.json();
+    if(d.tableros&&d.tableros.length){
+      const selM=document.getElementById('cfMaterial'), selP=document.getElementById('cfPuertas');
+      selM.innerHTML=''; selP.innerHTML='<option value="">— Igual que tablero —</option>';
+      d.tableros.forEach(t=>{selM.add(new Option(t.NOMBRE,t.NOMBRE));selP.add(new Option(t.NOMBRE,t.NOMBRE));});
+      return;
+    }
+  } catch(e) {}
+  const selM=document.getElementById('cfMaterial'), selP=document.getElementById('cfPuertas');
+  selM.innerHTML=''; selP.innerHTML='<option value="">— Igual que tablero —</option>';
+  mats.forEach(m=>{selM.add(new Option(m,m));selP.add(new Option(m,m));});
+}
+
+// ===== MODAL PROYECTO =====
+function abrirModalProyecto() { document.getElementById('modalProy').classList.add('visible'); cargarClientesModal(); }
+function cerrarModal() { document.getElementById('modalProy').classList.remove('visible'); }
+
+async function cargarClientesModal() {
+  try {
+    const url=`${URL_APP}?p=api&action=getClientes`;
+    const r=await fetch(url); const d=await r.json();
+    clientesData=d.clientes||[];
+    const sel=document.getElementById('mCli');
+    sel.innerHTML='<option value="">Seleccionar...</option>';
+    clientesData.forEach(c=>sel.add(new Option(c.CLIENTE,c.CLIENTE)));
+  } catch(e) { console.log('Sin conexión clientes'); }
+}
+
+function onCambiaCli() {
+  const cli=document.getElementById('mCli').value;
+  const f=clientesData.find(c=>c.CLIENTE===cli);
+  document.getElementById('mLoc').value=f?(f.LOCALIDAD||''):'';
+}
+
+function confirmarProy() {
+  const cli=document.getElementById('mCli').value, proy=document.getElementById('mProy').value.trim();
+  if(!cli||!proy){showToast('⚠ Rellena cliente y proyecto');return;}
+  proyecto={cliente:cli,localidad:document.getElementById('mLoc').value,nombre:proy,fecha:new Date().toLocaleDateString('es-ES')};
+  document.getElementById('badgeProyecto').textContent=`${cli} — ${proy}`;
+  cerrarModal(); showToast(`✅ Proyecto: ${proy}`);
 }
 
 // ===== TABS =====
 function switchTab(tab) {
-  document.getElementById('cont3d').style.display='none';
-  document.getElementById('panel2d').classList.remove('visible');
-  document.getElementById('panelDespiece').classList.remove('visible');
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('activo'));
-  if(tab==='3d'){document.getElementById('cont3d').style.display='block';document.getElementById('tab3d').classList.add('activo');engine.resize();}
-  else if(tab==='2d'){document.getElementById('panel2d').classList.add('visible');document.getElementById('tab2d').classList.add('activo');if(piezas.length)generarPlanos2D(piezas);}
-  else{document.getElementById('panelDespiece').classList.add('visible');document.getElementById('tabDesp').classList.add('activo');}
+  const panels=['cont3d','panelDiseno','panelBoceto','panelDespiece'];
+  const tabs=['tab3d','tabDiseno','tabBoceto','tabDesp'];
+  panels.forEach(id=>{const el=document.getElementById(id);if(el){el.style.display='none';el.classList&&el.classList.remove('visible');}});
+  tabs.forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('activo');});
+  const map={
+    '3d':['cont3d','tab3d'],
+    'diseno':['panelDiseno','tabDiseno'],
+    'boceto':['panelBoceto','tabBoceto'],
+    'despiece':['panelDespiece','tabDesp']
+  };
+  const [panelId,tabId]=map[tab]||map['diseno'];
+  const panel=document.getElementById(panelId);
+  if(panel){panel.style.display='block';panel.classList&&panel.classList.add('visible');}
+  const tabEl=document.getElementById(tabId); if(tabEl) tabEl.classList.add('activo');
+  if(tab==='3d'){engine&&engine.resize();}
+  if(tab==='boceto') generarBoceto();
 }
 
 // ===== EXPORTAR =====
-function exportarPDF() {
-  if(!piezas.length){showToast('⚠ Carga un proyecto primero');return;}
-  switchTab('despiece'); setTimeout(()=>window.print(),300);
-}
-
+function exportarPDF() { if(!todasPiezas.length){showToast('⚠ No hay piezas');return;} switchTab('despiece'); setTimeout(()=>window.print(),400); }
 function exportarDXF() {
-  if(!piezas.length){showToast('⚠ Carga un proyecto primero');return;}
+  if(!todasPiezas.length){showToast('⚠ No hay piezas');return;}
   let dxf='0\nSECTION\n2\nHEADER\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n';
-  piezas.forEach((p,i)=>{
-    const x=parseFloat(p.X)||0,y=parseFloat(p.Y)||0,w=parseFloat(p.ANCHO)||0,h=parseFloat(p.ALTO)||0;
-    dxf+=`0\nLWPOLYLINE\n8\nDESPIECE\n90\n4\n70\n1\n10\n${x}\n20\n${y}\n10\n${x+w}\n20\n${y}\n10\n${x+w}\n20\n${y+h}\n10\n${x}\n20\n${y+h}\n`;
-    dxf+=`0\nTEXT\n8\nETIQUETAS\n10\n${x+5}\n20\n${y+h/2}\n40\n20\n1\n${p.PIEZA||i+1}\n`;
+  let x=0;
+  todasPiezas.forEach((p,i)=>{
+    dxf+=`0\nLWPOLYLINE\n8\nDESPIECE\n90\n4\n70\n1\n10\n${x}\n20\n0\n10\n${x+p.ancho}\n20\n0\n10\n${x+p.ancho}\n20\n${p.largo}\n10\n${x}\n20\n${p.largo}\n`;
+    dxf+=`0\nTEXT\n8\nETIQ\n10\n${x+5}\n20\n${p.largo/2}\n40\n15\n1\n${p.nombre}\n`;
+    x+=p.ancho+20;
   });
   dxf+='0\nENDSEC\n0\nEOF';
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([dxf],{type:'text/plain'}));
@@ -728,12 +753,31 @@ function exportarDXF() {
   showToast('📐 DXF generado');
 }
 
-function volverApp() { window.location.href=URL_APP; }
+function volverApp() { window.location.href=URL_APP+'?p=Index'; }
+function toggleCanto(a,b) { if(a.checked) document.getElementById(b).checked=false; }
+function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('visible'); setTimeout(()=>t.classList.remove('visible'),3000); }
 
-function showToast(msg) {
-  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('visible');
-  setTimeout(()=>t.classList.remove('visible'),3000);
-}
+// ===== INIT =====
+window.addEventListener('DOMContentLoaded',()=>{
+  const canvas=document.getElementById('renderCanvas');
+  engine=new BABYLON.Engine(canvas,true);
+  scene=crearEscena(engine,canvas);
+  engine.runRenderLoop(()=>scene&&scene.render());
+  window.addEventListener('resize',()=>engine.resize());
+  renderBib('todos');
+  cargarTableros();
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('cli')) {
+    setTimeout(()=>{
+      document.getElementById('mCli').value=params.get('cli');
+      onCambiaCli();
+      if(params.get('proy')) document.getElementById('mProy').value=params.get('proy');
+    },600);
+  }
+  setTimeout(()=>document.getElementById('loading').classList.add('oculto'),2200);
+});
 </script>
 </body>
 </html>
+
+
