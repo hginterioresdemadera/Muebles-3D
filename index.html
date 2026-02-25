@@ -722,19 +722,41 @@ function confirmarProy() {
 function switchTab(tab) {
   const panels=['cont3d','panelDiseno','panelBoceto','panelDespiece'];
   const tabs=['tab3d','tabDiseno','tabBoceto','tabDesp'];
-  panels.forEach(id=>{const el=document.getElementById(id);if(el){el.style.display='none';el.classList&&el.classList.remove('visible');}});
-  tabs.forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('activo');});
+  
+  panels.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){ el.style.display='none'; el.classList.remove('visible'); }
+  });
+  tabs.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.classList.remove('activo');
+  });
+
   const map={
-    '3d':['cont3d','tab3d'],
-    'diseno':['panelDiseno','tabDiseno'],
-    'boceto':['panelBoceto','tabBoceto'],
+    '3d':    ['cont3d',       'tab3d'],
+    'diseno':['panelDiseno',  'tabDiseno'],
+    'boceto':['panelBoceto',  'tabBoceto'],
     'despiece':['panelDespiece','tabDesp']
   };
-  const [panelId,tabId]=map[tab]||map['diseno'];
-  const panel=document.getElementById(panelId);
-  if(panel){panel.style.display='block';panel.classList&&panel.classList.add('visible');}
-  const tabEl=document.getElementById(tabId); if(tabEl) tabEl.classList.add('activo');
-  if(tab==='3d'){engine&&engine.resize();}
+
+  const [panelId, tabId] = map[tab] || map['diseno'];
+  const panel = document.getElementById(panelId);
+  if(panel){
+    /* Usamos flex para diseño, block para el resto */
+    panel.style.display = (tab==='diseno') ? 'flex' : 'block';
+    panel.classList.add('visible');
+  }
+  const tabEl = document.getElementById(tabId);
+  if(tabEl) tabEl.classList.add('activo');
+
+  /* 3D: reactivar engine — Diseño/otros: pausar render */
+  if(tab==='3d'){
+    engine && engine.resize();
+    engine && engine.runRenderLoop(()=>scene&&scene.render());
+  } else {
+    engine && engine.stopRenderLoop();
+  }
+
   if(tab==='boceto') generarBoceto();
 }
 
