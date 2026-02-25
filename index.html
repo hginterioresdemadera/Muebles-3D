@@ -24,8 +24,8 @@ header { background:#1e1e1e; border-bottom:2px solid #ffb800; padding:0 16px; he
 .am { background:#ffb800; color:black; }
 .vd { background:#218838; color:white; }
 .gr { background:#555; color:#ccc; }
-.main { display:flex; flex:1; overflow:hidden; }
-.sidebar { width:265px; background:#383838; border-right:1px solid #555; display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; }
+.main { display:flex; flex:1; overflow:hidden; min-height:0; }
+.sidebar { width:265px; background:#383838; border-right:1px solid #555; display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; height:100%; }
 .sidebar::-webkit-scrollbar { width:4px; }
 .sidebar::-webkit-scrollbar-thumb { background:#555; border-radius:2px; }
 .sb-sec { padding:11px; border-bottom:1px solid #444; }
@@ -48,22 +48,33 @@ header { background:#1e1e1e; border-bottom:2px solid #ffb800; padding:0 16px; he
 .stat-val { font-weight:600; }
 .stat-val.am { color:#ffb800; }
 .stat-val.az { color:#00bcff; }
-.canvas-area { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.canvas-area { flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0; }
 .tabs { display:flex; background:#1e1e1e; border-bottom:1px solid #555; padding:0 12px; flex-shrink:0; }
 .tab { padding:9px 15px; font-size:11px; font-weight:700; color:#aaa; cursor:pointer; border-bottom:2px solid transparent; transition:0.2s; letter-spacing:1px; text-transform:uppercase; }
 .tab:hover { color:white; }
 .tab.activo { color:#ffb800; border-bottom-color:#ffb800; }
-.canvas-cont { flex:1; position:relative; overflow:hidden; background:#1a1a1a; }
+.canvas-cont { flex:1; position:relative; overflow:hidden; background:#1a1a1a; min-height:0; }
 #renderCanvas { width:100%; height:100%; display:block; touch-action:none; outline:none; }
 .vista-lbl { position:absolute; top:8px; left:8px; background:rgba(30,30,30,0.9); border:1px solid #555; border-radius:5px; padding:4px 10px; font-size:10px; color:#aaa; }
 .vista-lbl span { color:#ffb800; font-weight:700; }
 .ctrl-overlay { position:absolute; bottom:12px; right:12px; display:flex; flex-direction:column; gap:4px; }
 .ctrl-btn { width:32px; height:32px; background:rgba(56,56,56,0.92); border:1px solid #555; border-radius:5px; color:#ffb800; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; transition:0.15s; }
 .ctrl-btn:hover { background:#ffb800; color:black; }
-#panelDiseno { flex:1; background:#2c2c2c; display:none; overflow:hidden; }
+
+/* ── CORRECCIÓN PRINCIPAL — panel diseño ── */
+#panelDiseno { flex:1; background:#2c2c2c; display:none; overflow:hidden; min-height:0; }
 #panelDiseno.visible { display:flex; }
-.diseno-left { width:300px; background:#383838; border-right:1px solid #555; display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; }
-.diseno-right { flex:1; padding:14px; overflow-y:auto; }
+.diseno-left {
+  width:300px; background:#383838; border-right:1px solid #555;
+  display:flex; flex-direction:column; flex-shrink:0;
+  overflow-y:auto; height:100%;          /* ← altura completa */
+}
+.diseno-right {
+  flex:1; padding:14px;
+  overflow-y:auto;                        /* ← scroll activo */
+  height:0;                               /* ← clave para que flex calcule bien */
+}
+
 .bib-filtros { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:9px; }
 .filt-btn { padding:4px 9px; border-radius:4px; font-size:10px; font-weight:700; cursor:pointer; border:1px solid #555; background:#444; color:#aaa; transition:0.15s; font-family:'Segoe UI',sans-serif; text-transform:uppercase; }
 .filt-btn.activo { background:#ffb800; color:black; border-color:#ffb800; }
@@ -86,13 +97,13 @@ header { background:#1e1e1e; border-bottom:2px solid #ffb800; padding:0 16px; he
 .piezas-tabla th { padding:6px 9px; font-size:10px; text-transform:uppercase; letter-spacing:1px; text-align:left; }
 .piezas-tabla td { padding:5px 9px; border-bottom:1px solid #444; font-size:11px; }
 .piezas-tabla tbody tr:hover { background:#383838; }
-#panelBoceto { flex:1; background:#2c2c2c; display:none; overflow:auto; padding:14px; }
+#panelBoceto { flex:1; background:#2c2c2c; display:none; overflow:auto; padding:14px; min-height:0; }
 #panelBoceto.visible { display:block; }
 .boceto-wrap { background:#383838; border-radius:9px; border:1px solid #555; padding:18px; max-width:900px; margin:0 auto; }
 .boc-hdr { display:flex; justify-content:space-between; margin-bottom:12px; padding-bottom:9px; border-bottom:2px solid #ffb800; }
 .boc-titulo { color:#ffb800; font-size:15px; font-weight:700; letter-spacing:2px; text-transform:uppercase; }
 .boc-meta { font-size:11px; color:#aaa; margin-top:3px; }
-#panelDespiece { flex:1; background:#2c2c2c; display:none; overflow:auto; padding:14px; }
+#panelDespiece { flex:1; background:#2c2c2c; display:none; overflow:auto; padding:14px; min-height:0; }
 #panelDespiece.visible { display:block; }
 .desp-wrap { background:#383838; border-radius:9px; border:1px solid #555; padding:18px; max-width:1000px; margin:0 auto; }
 .desp-hdr { display:flex; justify-content:space-between; margin-bottom:12px; padding-bottom:9px; border-bottom:2px solid #ffb800; }
@@ -198,7 +209,7 @@ tbody tr:hover { background:#444; }
             <button class="filt-btn" onclick="filtrarBib('Estantería',this)">Estanterías</button>
             <button class="filt-btn" onclick="filtrarBib('Cajonera',this)">Cajoneras</button>
           </div>
-          <div id="listaBiblioteca" style="max-height:calc(100vh - 300px);overflow-y:auto"></div>
+          <div id="listaBiblioteca" style="max-height:calc(100vh - 280px);overflow-y:auto"></div>
         </div>
       </div>
       <div class="diseno-right">
@@ -344,7 +355,6 @@ let todasPiezas = [];
 let clientesData = [];
 let bibSel = null;
 
-// ===== BIBLIOTECA MERCADO ESPAÑOL =====
 const BIB = [
   { id:'A1', nombre:'Armario columna 600', cat:'Armario', alto:2100, ancho:600, fondo:600, desc:'2 puertas. Estándar dormitorio.', nPuertas:2, nBaldas:2 },
   { id:'A2', nombre:'Armario columna 900', cat:'Armario', alto:2100, ancho:900, fondo:600, desc:'3 puertas. Estándar dormitorio.', nPuertas:3, nBaldas:2 },
@@ -389,7 +399,6 @@ function mmCanto(largo, ancho, cantos) {
   return t;
 }
 
-// ===== CALCULAR PIEZAS =====
 function calcularPiezas(mod, cfg) {
   const gr=cfg.grueso, grR=cfg.respaldo, mat=cfg.material||'Blanco mate', matP=cfg.matPuertas||mat;
   const iAncho=cfg.ancho-(gr*2), iAlto=cfg.alto-(gr*2), iFondo=cfg.fondo-grR;
@@ -483,9 +492,8 @@ function actualizarStats() {
   document.getElementById('stCanto').textContent=(t/1000).toFixed(2)+' m';
 }
 
-// ===== 3D =====
-function crearEscena(engine,canvas) {
-  const sc=new BABYLON.Scene(engine);
+function crearEscena(eng,canvas) {
+  const sc=new BABYLON.Scene(eng);
   sc.clearColor=new BABYLON.Color4(0.1,0.1,0.1,1);
   camera=new BABYLON.ArcRotateCamera('c',-Math.PI/4,Math.PI/3.5,25,BABYLON.Vector3.Zero(),sc);
   camera.attachControl(canvas,true); camera.lowerRadiusLimit=2; camera.upperRadiusLimit=300; camera.wheelDeltaPercentage=0.01;
@@ -548,7 +556,6 @@ function centrarCamara() {
   camera.target=new BABYLON.Vector3(cx/meshes.length,cy/meshes.length/2,cz/meshes.length);
 }
 
-// ===== BOCETO =====
 function generarBoceto() {
   const svg=document.getElementById('svgBoceto'); svg.innerHTML='';
   document.getElementById('bocMeta').textContent=proyecto.nombre?`${proyecto.cliente} — ${proyecto.nombre} — ${proyecto.localidad}`:'—';
@@ -584,7 +591,6 @@ function generarBoceto() {
   document.getElementById('leyendaBoc').innerHTML=`<div style="margin-top:8px;padding:9px;background:#2c2c2c;border-radius:6px;border:1px solid #444;display:flex;flex-wrap:wrap">${ley.join('')}</div>`;
 }
 
-// ===== DESPIECE =====
 function generarDespiece() {
   const tb=document.getElementById('despTb');
   if(!todasPiezas.length){tb.innerHTML='<tr><td colspan="9" style="text-align:center;color:#555;padding:16px">Sin datos</td></tr>';document.getElementById('resCantos').style.display='none';return;}
@@ -608,7 +614,6 @@ function generarDespiece() {
   document.getElementById('resCantos').style.display='block';
 }
 
-// ===== GUARDAR EN CORTES =====
 async function guardarEnCortes() {
   if(!todasPiezas.length){showToast('⚠ No hay piezas');return;}
   if(!proyecto.nombre){showToast('⚠ Selecciona un proyecto');abrirModalProyecto();return;}
@@ -636,7 +641,6 @@ async function guardarEnCortes() {
   }
 }
 
-// ===== BIBLIOTECA =====
 function renderBib(filtro) {
   const c=document.getElementById('listaBiblioteca');
   const items=filtro==='todos'?BIB:BIB.filter(m=>m.cat===filtro);
@@ -687,7 +691,6 @@ async function cargarTableros() {
   mats.forEach(m=>{selM.add(new Option(m,m));selP.add(new Option(m,m));});
 }
 
-// ===== MODAL PROYECTO =====
 function abrirModalProyecto() { document.getElementById('modalProy').classList.add('visible'); cargarClientesModal(); }
 function cerrarModal() { document.getElementById('modalProy').classList.remove('visible'); }
 
@@ -716,7 +719,6 @@ function confirmarProy() {
   cerrarModal(); showToast(`✅ Proyecto: ${proy}`);
 }
 
-// ===== TABS =====
 function switchTab(tab) {
   const panels=['cont3d','panelDiseno','panelBoceto','panelDespiece'];
   const tabs=['tab3d','tabDiseno','tabBoceto','tabDesp'];
@@ -736,8 +738,8 @@ function switchTab(tab) {
   if(tab==='boceto') generarBoceto();
 }
 
-// ===== EXPORTAR =====
 function exportarPDF() { if(!todasPiezas.length){showToast('⚠ No hay piezas');return;} switchTab('despiece'); setTimeout(()=>window.print(),400); }
+
 function exportarDXF() {
   if(!todasPiezas.length){showToast('⚠ No hay piezas');return;}
   let dxf='0\nSECTION\n2\nHEADER\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n';
@@ -757,7 +759,6 @@ function volverApp() { window.location.href=URL_APP+'?p=Index'; }
 function toggleCanto(a,b) { if(a.checked) document.getElementById(b).checked=false; }
 function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('visible'); setTimeout(()=>t.classList.remove('visible'),3000); }
 
-// ===== INIT =====
 window.addEventListener('DOMContentLoaded',()=>{
   const canvas=document.getElementById('renderCanvas');
   engine=new BABYLON.Engine(canvas,true);
